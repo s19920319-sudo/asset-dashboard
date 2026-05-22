@@ -524,24 +524,39 @@ function importData() {
 }
 function saveData() {
   const now = new Date().toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
-  localStorage.setItem('assetData3', JSON.stringify({
-    stock:  parseFloat(document.getElementById('input-stock').value)  || 0,
-    cathay: parseFloat(document.getElementById('input-bank-cathay').value) || 0,
-    mega:   parseFloat(document.getElementById('input-bank-mega').value)   || 0,
-    obank:  parseFloat(document.getElementById('input-bank-obank').value)  || 0,
-    usd:    parseFloat(document.getElementById('input-usd').value)    || 0,
-    crypto: parseFloat(document.getElementById('input-crypto').value) || 0,
+
+  // 讀取舊資料，避免覆蓋其他欄位
+  let old = {};
+  try { old = JSON.parse(localStorage.getItem('assetData3')) || {}; } catch(e) {}
+
+  const newStock  = document.getElementById('input-stock').value;
+  const newCathay = document.getElementById('input-bank-cathay').value;
+  const newMega   = document.getElementById('input-bank-mega').value;
+  const newObank  = document.getElementById('input-bank-obank').value;
+  const newUsd    = document.getElementById('input-usd').value;
+  const newCrypto = document.getElementById('input-crypto').value;
+  const newOther  = document.getElementById('input-other').value;
+
+  const merged = {
+    stock:     newStock  !== '' ? parseFloat(newStock)  : (old.stock  || 0),
+    cathay:    newCathay !== '' ? parseFloat(newCathay) : (old.cathay || 0),
+    mega:      newMega   !== '' ? parseFloat(newMega)   : (old.mega   || 0),
+    obank:     newObank  !== '' ? parseFloat(newObank)  : (old.obank  || 0),
+    usd:       newUsd    !== '' ? parseFloat(newUsd)    : (old.usd    || 0),
+    crypto:    newCrypto !== '' ? parseFloat(newCrypto) : (old.crypto || 0),
     cryptoCur: document.getElementById('crypto-currency').value,
-    other:  parseFloat(document.getElementById('input-other').value)  || 0,
-    savedAt: now
-  }));
-  updateBankTotal();
-  updateUIFromInputs();
-  // 清空所有輸入欄
+    other:     newOther  !== '' ? parseFloat(newOther)  : (old.other  || 0),
+    savedAt:   now
+  };
+
+  localStorage.setItem('assetData3', JSON.stringify(merged));
+
+  // 清空輸入欄
   ['input-stock','input-bank-cathay','input-bank-mega','input-bank-obank','input-usd','input-crypto','input-other'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  updateBankTotal();
+
+  loadData();
   document.getElementById('last-saved').textContent = '上次儲存：' + now;
   const note = document.getElementById('saved-note');
   note.classList.add('show');
