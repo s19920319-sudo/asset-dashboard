@@ -265,6 +265,11 @@ select:focus { border-color: #f5c96b; }
           <div class="saved-note" id="saved-note">✓ 資料已儲存</div>
           <div class="last-saved" id="last-saved"></div>
           <hr class="divider">
+          <div style="display:flex; gap:8px;">
+            <button class="btn-change-pin" style="flex:1;" onclick="exportData()">📤 匯出資料</button>
+            <button class="btn-change-pin" style="flex:1;" onclick="importData()">📥 匯入資料</button>
+          </div>
+          <hr class="divider">
           <button class="btn-change-pin" onclick="startChangePin()">變更 PIN 碼</button>
         </div>
       </div>
@@ -492,7 +497,31 @@ function updateUIFromInputs() {
   chart.update();
 }
 
-/* ── SAVE / LOAD ── */
+function exportData() {
+  const raw = localStorage.getItem('assetData3');
+  if (!raw) { alert('還沒有儲存任何資料'); return; }
+  const text = '【資產儀表板備份】\n' + raw;
+  if (navigator.share) {
+    navigator.share({ title: '資產儀表板備份', text });
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('✓ 已複製到剪貼簿，請貼到 LINE 或備忘錄傳給自己'));
+  }
+}
+
+function importData() {
+  const text = prompt('請貼上備份文字：');
+  if (!text) return;
+  try {
+    const json = text.replace('【資產儀表板備份】', '').trim();
+    const d = JSON.parse(json);
+    if (!('stock' in d)) throw new Error();
+    localStorage.setItem('assetData3', json);
+    loadData();
+    alert('✓ 匯入成功！');
+  } catch(e) {
+    alert('格式錯誤，請確認貼上的是正確的備份文字');
+  }
+}
 function saveData() {
   const now = new Date().toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
   localStorage.setItem('assetData3', JSON.stringify({
