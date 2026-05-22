@@ -199,7 +199,7 @@ select:focus { border-color: #f5c96b; }
             <label class="field-label">台股總市值 (NTD)</label>
             <div class="field-input-wrap">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-stock" placeholder="0" min="0" inputmode="numeric" oninput="updateUIFromInputs()">
+              <input type="number" id="input-stock" placeholder="0" min="0" inputmode="numeric">
             </div>
           </div>
 
@@ -216,9 +216,9 @@ select:focus { border-color: #f5c96b; }
             </select>
             <div style="position:relative; margin-top:6px;">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-bank-cathay" placeholder="0" min="0" inputmode="numeric" oninput="updateBankTotal()">
-              <input type="number" id="input-bank-mega"   placeholder="0" min="0" inputmode="numeric" oninput="updateBankTotal()" style="display:none;">
-              <input type="number" id="input-bank-obank"  placeholder="0" min="0" inputmode="numeric" oninput="updateBankTotal()" style="display:none;">
+              <input type="number" id="input-bank-cathay" placeholder="0" min="0" inputmode="numeric">
+              <input type="number" id="input-bank-mega"   placeholder="0" min="0" inputmode="numeric" style="display:none;">
+              <input type="number" id="input-bank-obank"  placeholder="0" min="0" inputmode="numeric" style="display:none;">
             </div>
             <div class="bank-subtotal">
               國泰：<span id="sub-cathay">0</span>　兆豐：<span id="sub-mega">0</span>　王道：<span id="sub-obank">0</span>
@@ -230,7 +230,7 @@ select:focus { border-color: #f5c96b; }
             <label class="field-label">美金存款 (USD)</label>
             <div class="field-input-wrap">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-usd" placeholder="0" min="0" inputmode="numeric" oninput="updateUIFromInputs()">
+              <input type="number" id="input-usd" placeholder="0" min="0" inputmode="numeric">
             </div>
           </div>
 
@@ -243,9 +243,9 @@ select:focus { border-color: #f5c96b; }
             <div class="field-row">
               <div class="field-input-wrap">
                 <span class="field-prefix">$</span>
-                <input type="number" id="input-crypto" placeholder="0" min="0" inputmode="numeric" oninput="updateUIFromInputs()">
+                <input type="number" id="input-crypto" placeholder="0" min="0" inputmode="numeric">
               </div>
-              <select id="crypto-currency" onchange="updateUIFromInputs()">
+              <select id="crypto-currency">
                 <option value="NTD">NTD</option>
                 <option value="USD">USD</option>
               </select>
@@ -257,7 +257,7 @@ select:focus { border-color: #f5c96b; }
             <label class="field-label">其他資產 (NTD)</label>
             <div class="field-input-wrap">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-other" placeholder="0" min="0" inputmode="numeric" oninput="updateUIFromInputs()">
+              <input type="number" id="input-other" placeholder="0" min="0" inputmode="numeric">
             </div>
           </div>
 
