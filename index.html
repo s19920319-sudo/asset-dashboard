@@ -537,6 +537,11 @@ function saveData() {
   }));
   updateBankTotal();
   updateUIFromInputs();
+  // 清空所有輸入欄
+  ['input-stock','input-bank-cathay','input-bank-mega','input-bank-obank','input-usd','input-crypto','input-other'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  updateBankTotal();
   document.getElementById('last-saved').textContent = '上次儲存：' + now;
   const note = document.getElementById('saved-note');
   note.classList.add('show');
@@ -547,17 +552,37 @@ function loadData() {
   try {
     const d = JSON.parse(localStorage.getItem('assetData3'));
     if (!d) return;
-    document.getElementById('input-stock').value       = d.stock  || '';
-    document.getElementById('input-bank-cathay').value = d.cathay || '';
-    document.getElementById('input-bank-mega').value   = d.mega   || '';
-    document.getElementById('input-bank-obank').value  = d.obank  || '';
-    document.getElementById('input-usd').value         = d.usd    || '';
-    document.getElementById('input-crypto').value      = d.crypto || '';
-    document.getElementById('crypto-currency').value   = d.cryptoCur || 'NTD';
-    document.getElementById('input-other').value       = d.other  || '';
+    // 不填回輸入欄，只更新卡片與圖表
+    const rate = usdToNtd || 32;
+    const usdNtd    = (d.usd    || 0) * rate;
+    const cryptoNtd = d.cryptoCur === 'USD' ? (d.crypto || 0) * rate : (d.crypto || 0);
+    const bank      = (d.cathay || 0) + (d.mega || 0) + (d.obank || 0);
+    const stock     = d.stock  || 0;
+    const other     = d.other  || 0;
+    const total     = stock + bank + usdNtd + cryptoNtd + other;
+    const has       = total > 0;
+
+    document.getElementById('c-total').textContent     = has ? fmt(total) : '—';
+    document.getElementById('c-total-usd').textContent = has ? '≈ USD ' + Math.round(total/rate).toLocaleString() : '—';
+    document.getElementById('c-stock').textContent     = has ? fmt(stock) : '—';
+    document.getElementById('c-bank').textContent      = has ? fmt(bank)  : '—';
+    document.getElementById('c-usd').textContent       = has ? 'USD ' + (d.usd||0).toLocaleString() : '—';
+    document.getElementById('c-usd-ntd').textContent   = has ? '≈ NTD ' + fmt(usdNtd) : '—';
+    document.getElementById('c-crypto').textContent    = has ? fmt(cryptoNtd) : '—';
+    document.getElementById('c-other').textContent     = has ? fmt(other) : '—';
+
+    const vals = [stock, bank, usdNtd, cryptoNtd, other];
+    const keys = ['stock','bank','usd','crypto','other'];
+    keys.forEach((k, i) => {
+      const pEl = document.getElementById('c-'+k+'-pct');
+      if (pEl) pEl.textContent = has ? pct(vals[i], total) : '—%';
+      document.getElementById('l-'+k).textContent = has ? pct(vals[i], total) : '—';
+    });
+    chart.data.datasets[0].data = has ? vals : [1,1,1,1,1];
+    chart.data.datasets[0].backgroundColor = has ? COLORS : Array(5).fill('#e8e6dc');
+    chart.update();
+
     if (d.savedAt) document.getElementById('last-saved').textContent = '上次儲存：' + d.savedAt;
-    updateBankTotal();
-    updateUIFromInputs();
   } catch(e) {}
 }
 
