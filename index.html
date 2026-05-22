@@ -550,14 +550,22 @@ function saveData() {
 
 function loadData() {
   try {
-    const d = JSON.parse(localStorage.getItem('assetData3'));
-    if (!d) return;
-    // 不填回輸入欄，只更新卡片與圖表
-    const rate = usdToNtd || 32;
-    const usdNtd    = (d.usd    || 0) * rate;
-    const cryptoNtd = d.cryptoCur === 'USD' ? (d.crypto || 0) * rate : (d.crypto || 0);
-    const bank      = (d.cathay || 0) + (d.mega || 0) + (d.obank || 0);
+    const raw = localStorage.getItem('assetData3');
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    if (!d || typeof d !== 'object') return;
+
+    const rate      = usdToNtd || 32;
+    const cathay    = d.cathay || 0;
+    const mega      = d.mega   || 0;
+    const obank     = d.obank  || 0;
+    const bank      = cathay + mega + obank;
     const stock     = d.stock  || 0;
+    const usdAmt    = d.usd    || 0;
+    const usdNtd    = usdAmt * rate;
+    const cryptoRaw = d.crypto || 0;
+    const cryptoCur = d.cryptoCur || 'NTD';
+    const cryptoNtd = cryptoCur === 'USD' ? cryptoRaw * rate : cryptoRaw;
     const other     = d.other  || 0;
     const total     = stock + bank + usdNtd + cryptoNtd + other;
     const has       = total > 0;
@@ -566,7 +574,7 @@ function loadData() {
     document.getElementById('c-total-usd').textContent = has ? '≈ USD ' + Math.round(total/rate).toLocaleString() : '—';
     document.getElementById('c-stock').textContent     = has ? fmt(stock) : '—';
     document.getElementById('c-bank').textContent      = has ? fmt(bank)  : '—';
-    document.getElementById('c-usd').textContent       = has ? 'USD ' + (d.usd||0).toLocaleString() : '—';
+    document.getElementById('c-usd').textContent       = has ? 'USD ' + usdAmt.toLocaleString() : '—';
     document.getElementById('c-usd-ntd').textContent   = has ? '≈ NTD ' + fmt(usdNtd) : '—';
     document.getElementById('c-crypto').textContent    = has ? fmt(cryptoNtd) : '—';
     document.getElementById('c-other').textContent     = has ? fmt(other) : '—';
@@ -578,17 +586,19 @@ function loadData() {
       if (pEl) pEl.textContent = has ? pct(vals[i], total) : '—%';
       document.getElementById('l-'+k).textContent = has ? pct(vals[i], total) : '—';
     });
+
     chart.data.datasets[0].data = has ? vals : [1,1,1,1,1];
     chart.data.datasets[0].backgroundColor = has ? COLORS : Array(5).fill('#e8e6dc');
     chart.update();
 
-    // 更新銀行小計顯示
-    document.getElementById('sub-cathay').textContent = d.cathay ? fmt(d.cathay) : '0';
-    document.getElementById('sub-mega').textContent   = d.mega   ? fmt(d.mega)   : '0';
-    document.getElementById('sub-obank').textContent  = d.obank  ? fmt(d.obank)  : '0';
+    document.getElementById('sub-cathay').textContent = cathay ? fmt(cathay) : '0';
+    document.getElementById('sub-mega').textContent   = mega   ? fmt(mega)   : '0';
+    document.getElementById('sub-obank').textContent  = obank  ? fmt(obank)  : '0';
 
     if (d.savedAt) document.getElementById('last-saved').textContent = '上次儲存：' + d.savedAt;
-  } catch(e) {}
+  } catch(e) {
+    console.error('loadData error:', e);
+  }
 }
 
 /* ── INIT ── */
