@@ -12,271 +12,519 @@
 <title>全資產動態儀表板</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #f7f6f0;
-    color: #2c2c2a;
-    min-height: 100vh;
-  }
-  .header {
-    background: #fff;
-    border-bottom: 1px solid #e8e6dc;
-    padding: 18px 20px 14px;
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-  }
-  .header h1 { font-size: 18px; font-weight: 500; color: #2c2c2a; letter-spacing: -0.3px; }
-  .header span { font-size: 12px; color: #888780; }
-  .main { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f7f6f0; color: #2c2c2a; min-height: 100vh;
+}
 
-  .cards-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-  }
-  @media (max-width: 540px) {
-    .cards-row { grid-template-columns: repeat(3, 1fr); }
-    .card.total { grid-column: span 3; }
-  }
-  .card {
-    background: #fff;
-    border: 1px solid #e8e6dc;
-    border-radius: 14px;
-    padding: 12px 12px;
-    position: relative;
-    overflow: hidden;
-  }
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    border-radius: 14px 14px 0 0;
-  }
-  .card.total::before  { background: #b5a8f0; }
-  .card.stock::before  { background: #7ac47a; }
-  .card.bank::before   { background: #f5c96b; }
-  .card.crypto::before { background: #f0a070; }
-  .card.other::before  { background: #8bc4e0; }
-  .card-label { font-size: 10px; color: #888780; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .card-value { font-size: 16px; font-weight: 500; color: #2c2c2a; letter-spacing: -0.4px; line-height: 1.1; }
-  .card-sub   { font-size: 10px; color: #b4b2a9; margin-top: 3px; }
+/* PIN SCREEN */
+#pin-screen {
+  position: fixed; inset: 0; background: #f7f6f0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 28px; z-index: 100;
+}
+.pin-title { font-size: 20px; font-weight: 500; color: #2c2c2a; }
+.pin-sub { font-size: 13px; color: #888780; margin-top: -20px; }
+.pin-dots { display: flex; gap: 14px; }
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #c5c3b9; background: transparent;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pin-dot.filled { background: #2c2c2a; border-color: #2c2c2a; }
+.pin-dot.error  { background: #e24b4a; border-color: #e24b4a; }
+.pin-keypad {
+  display: grid; grid-template-columns: repeat(3, 72px);
+  gap: 12px;
+}
+.pin-key {
+  height: 72px; border-radius: 50%; border: 1px solid #e8e6dc;
+  background: #fff; font-size: 22px; font-weight: 400;
+  color: #2c2c2a; cursor: pointer; transition: background 0.1s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center;
+}
+.pin-key:active { background: #f0ede4; transform: scale(0.95); }
+.pin-key.del { font-size: 16px; color: #888780; }
+.pin-key.empty { border: none; background: transparent; cursor: default; }
+.pin-error-msg { font-size: 13px; color: #e24b4a; height: 18px; }
+.pin-locked { font-size: 14px; color: #e24b4a; text-align: center; line-height: 1.6; }
 
-  .content-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    align-items: start;
-  }
-  @media (max-width: 540px) {
-    .content-row { grid-template-columns: 1fr; }
-  }
+/* MAIN APP */
+#app { display: none; }
+.header {
+  background: #fff; border-bottom: 1px solid #e8e6dc;
+  padding: 16px 20px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.header-left h1 { font-size: 17px; font-weight: 500; letter-spacing: -0.3px; }
+.header-left span { font-size: 11px; color: #888780; }
+.header-right { display: flex; align-items: center; gap: 10px; }
+.rate-badge {
+  font-size: 11px; color: #639922; background: #f4faf4;
+  border: 1px solid #d4ecd4; border-radius: 6px; padding: 4px 8px;
+}
+.rate-badge.loading { color: #888780; background: #f7f6f0; border-color: #e8e6dc; }
+.btn-lock {
+  font-size: 12px; color: #888780; background: none;
+  border: 1px solid #e8e6dc; border-radius: 6px;
+  padding: 4px 10px; cursor: pointer;
+}
+.main { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
 
-  .panel {
-    background: #fff;
-    border: 1px solid #e8e6dc;
-    border-radius: 14px;
-    padding: 16px;
-  }
-  .panel-title {
-    font-size: 13px;
-    font-weight: 500;
-    color: #444441;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0ede4;
-  }
+/* CARDS */
+.cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.card {
+  background: #fff; border: 1px solid #e8e6dc;
+  border-radius: 12px; padding: 11px 12px;
+  position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; border-radius: 12px 12px 0 0;
+}
+.card.total::before  { background: #b5a8f0; }
+.card.stock::before  { background: #7ac47a; }
+.card.bank-ntd::before { background: #f5c96b; }
+.card.bank-usd::before { background: #f5d88a; }
+.card.crypto::before { background: #f0a070; }
+.card.other::before  { background: #8bc4e0; }
+.card-label { font-size: 10px; color: #888780; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-value { font-size: 15px; font-weight: 500; color: #2c2c2a; letter-spacing: -0.4px; line-height: 1.2; }
+.card-sub   { font-size: 10px; color: #b4b2a9; margin-top: 2px; }
 
-  .legend { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
-  .legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #5f5e5a; }
-  .legend-left { display: flex; align-items: center; gap: 7px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-  .legend-pct { font-weight: 500; color: #2c2c2a; font-size: 12px; }
+/* CONTENT */
+.content-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+@media (max-width: 520px) { .content-row { grid-template-columns: 1fr; } }
 
-  .form-grid { display: flex; flex-direction: column; gap: 10px; }
-  .field-group { display: flex; flex-direction: column; gap: 4px; }
-  .field-label { font-size: 11px; color: #888780; }
-  .field-input-wrap { position: relative; }
-  .field-prefix {
-    position: absolute; left: 10px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 13px; color: #b4b2a9; pointer-events: none;
-  }
-  input[type="number"] {
-    width: 100%;
-    padding: 9px 10px 9px 30px;
-    border: 1px solid #e8e6dc;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #2c2c2a;
-    background: #fafaf7;
-    outline: none;
-    transition: border-color 0.15s;
-    -moz-appearance: textfield;
-  }
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-  input[type="number"]:focus { border-color: #7ac47a; background: #fff; }
+.panel {
+  background: #fff; border: 1px solid #e8e6dc;
+  border-radius: 14px; padding: 16px;
+}
+.panel-title {
+  font-size: 13px; font-weight: 500; color: #444441;
+  margin-bottom: 12px; padding-bottom: 10px;
+  border-bottom: 1px solid #f0ede4;
+}
 
-  .divider { border: none; border-top: 1px dashed #ede9de; margin: 2px 0; }
-  .section-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.4px; color: #b4b2a9; text-transform: uppercase; margin-bottom: -4px; }
+.legend { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
+.legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #5f5e5a; }
+.legend-left { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.legend-pct { font-weight: 500; color: #2c2c2a; font-size: 11px; }
 
-  .btn-save {
-    margin-top: 2px;
-    width: 100%;
-    padding: 11px;
-    background: #2c2c2a;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-  }
-  .btn-save:hover { background: #444441; }
-  .btn-save:active { transform: scale(0.98); }
+.form-grid { display: flex; flex-direction: column; gap: 10px; }
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.field-label { font-size: 11px; color: #888780; }
+.field-row { display: flex; gap: 6px; }
+.field-input-wrap { position: relative; flex: 1; }
+.field-prefix {
+  position: absolute; left: 9px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px; color: #b4b2a9; pointer-events: none;
+}
+input[type="number"] {
+  width: 100%; padding: 8px 8px 8px 26px;
+  border: 1px solid #e8e6dc; border-radius: 8px;
+  font-size: 13px; color: #2c2c2a; background: #fafaf7;
+  outline: none; transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type="number"]:focus { border-color: #7ac47a; background: #fff; }
 
-  .saved-note {
-    font-size: 11px; color: #639922; text-align: center;
-    margin-top: 4px; height: 14px; opacity: 0; transition: opacity 0.3s;
-  }
-  .saved-note.show { opacity: 1; }
+select {
+  padding: 8px 6px; border: 1px solid #e8e6dc; border-radius: 8px;
+  font-size: 12px; color: #2c2c2a; background: #fafaf7;
+  outline: none; cursor: pointer;
+}
+select:focus { border-color: #f0a070; }
 
-  .last-saved {
-    font-size: 10px; color: #b4b2a9; text-align: right; margin-top: -8px;
-  }
+.divider { border: none; border-top: 1px dashed #ede9de; margin: 2px 0; }
+.section-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.4px; color: #b4b2a9; text-transform: uppercase; margin-bottom: -4px; }
+
+.btn-save {
+  margin-top: 2px; width: 100%; padding: 10px;
+  background: #2c2c2a; color: #fff; border: none;
+  border-radius: 8px; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background 0.15s, transform 0.1s;
+}
+.btn-save:hover { background: #444441; }
+.btn-save:active { transform: scale(0.98); }
+.saved-note { font-size: 11px; color: #639922; text-align: center; margin-top: 4px; height: 14px; opacity: 0; transition: opacity 0.3s; }
+.saved-note.show { opacity: 1; }
+.last-saved { font-size: 10px; color: #b4b2a9; text-align: right; margin-top: -6px; }
+
+/* PIN CHANGE */
+.btn-change-pin {
+  width: 100%; padding: 8px; background: none;
+  border: 1px dashed #e8e6dc; border-radius: 8px;
+  font-size: 12px; color: #b4b2a9; cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-change-pin:hover { border-color: #888780; color: #5f5e5a; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>全資產動態儀表板</h1>
-  <span>NT$</span>
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="pin-title" id="pin-title">輸入 PIN 碼</div>
+  <div class="pin-sub" id="pin-sub"></div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-error-msg" id="pin-error"></div>
+  <div class="pin-keypad">
+    <button class="pin-key" onclick="pinInput('1')">1</button>
+    <button class="pin-key" onclick="pinInput('2')">2</button>
+    <button class="pin-key" onclick="pinInput('3')">3</button>
+    <button class="pin-key" onclick="pinInput('4')">4</button>
+    <button class="pin-key" onclick="pinInput('5')">5</button>
+    <button class="pin-key" onclick="pinInput('6')">6</button>
+    <button class="pin-key" onclick="pinInput('7')">7</button>
+    <button class="pin-key" onclick="pinInput('8')">8</button>
+    <button class="pin-key" onclick="pinInput('9')">9</button>
+    <button class="pin-key empty"></button>
+    <button class="pin-key" onclick="pinInput('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
 </div>
 
-<div class="main">
-  <div class="cards-row">
-    <div class="card total">
-      <div class="card-label">總資產</div>
-      <div class="card-value" id="c-total">—</div>
-      <div class="card-sub">NT$</div>
+<!-- MAIN APP -->
+<div id="app">
+  <div class="header">
+    <div class="header-left">
+      <h1>全資產動態儀表板</h1>
+      <span>Asset Dashboard</span>
     </div>
-    <div class="card stock">
-      <div class="card-label">台股總市值</div>
-      <div class="card-value" id="c-stock">—</div>
-      <div class="card-sub" id="c-stock-pct">—%</div>
-    </div>
-    <div class="card bank">
-      <div class="card-label">銀行存款</div>
-      <div class="card-value" id="c-bank">—</div>
-      <div class="card-sub" id="c-bank-pct">—%</div>
-    </div>
-    <div class="card crypto">
-      <div class="card-label">幣圈資產</div>
-      <div class="card-value" id="c-crypto">—</div>
-      <div class="card-sub" id="c-crypto-pct">—%</div>
-    </div>
-    <div class="card other">
-      <div class="card-label">其他資產</div>
-      <div class="card-value" id="c-other">—</div>
-      <div class="card-sub" id="c-other-pct">—%</div>
+    <div class="header-right">
+      <div class="rate-badge loading" id="rate-badge">匯率載入中…</div>
+      <button class="btn-lock" onclick="lockApp()">鎖定</button>
     </div>
   </div>
 
-  <div class="content-row">
-    <div class="panel">
-      <div class="panel-title">資產配置比例</div>
-      <div style="position: relative; width: 100%; height: 180px;">
-        <canvas id="assetChart" role="img" aria-label="甜甜圈圖：四類資產比例">資產比例圖表</canvas>
+  <div class="main">
+    <!-- Cards: 3+3 layout -->
+    <div class="cards-row">
+      <div class="card total">
+        <div class="card-label">總資產（NTD）</div>
+        <div class="card-value" id="c-total">—</div>
+        <div class="card-sub" id="c-total-usd">—</div>
       </div>
-      <div class="legend">
-        <div class="legend-item">
-          <div class="legend-left"><div class="legend-dot" style="background:#7ac47a"></div>台股總市值</div>
-          <span class="legend-pct" id="l-stock">—</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-left"><div class="legend-dot" style="background:#f5c96b"></div>銀行存款</div>
-          <span class="legend-pct" id="l-bank">—</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-left"><div class="legend-dot" style="background:#f0a070"></div>幣圈資產</div>
-          <span class="legend-pct" id="l-crypto">—</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-left"><div class="legend-dot" style="background:#8bc4e0"></div>其他資產</div>
-          <span class="legend-pct" id="l-other">—</span>
-        </div>
+      <div class="card stock">
+        <div class="card-label">台股總市值</div>
+        <div class="card-value" id="c-stock">—</div>
+        <div class="card-sub" id="c-stock-pct">—%</div>
+      </div>
+      <div class="card bank-ntd">
+        <div class="card-label">銀行存款（NTD）</div>
+        <div class="card-value" id="c-bank">—</div>
+        <div class="card-sub" id="c-bank-pct">—%</div>
+      </div>
+    </div>
+    <div class="cards-row">
+      <div class="card bank-usd">
+        <div class="card-label">美金存款（USD）</div>
+        <div class="card-value" id="c-usd">—</div>
+        <div class="card-sub" id="c-usd-ntd">—</div>
+      </div>
+      <div class="card crypto">
+        <div class="card-label">幣圈資產</div>
+        <div class="card-value" id="c-crypto">—</div>
+        <div class="card-sub" id="c-crypto-pct">—%</div>
+      </div>
+      <div class="card other">
+        <div class="card-label">其他資產</div>
+        <div class="card-value" id="c-other">—</div>
+        <div class="card-sub" id="c-other-pct">—%</div>
       </div>
     </div>
 
-    <div class="panel">
-      <div class="panel-title">手動輸入資產</div>
-      <div class="form-grid">
-        <div class="section-tag">股市</div>
-        <div class="field-group">
-          <label class="field-label" for="input-stock">台股總市值 (NT$)</label>
-          <div class="field-input-wrap">
-            <span class="field-prefix">$</span>
-            <input type="number" id="input-stock" placeholder="0" min="0" inputmode="numeric" />
-          </div>
+    <div class="content-row">
+      <!-- Chart -->
+      <div class="panel">
+        <div class="panel-title">資產配置比例</div>
+        <div style="position: relative; width: 100%; height: 170px;">
+          <canvas id="assetChart" role="img" aria-label="甜甜圈圖：五類資產比例">資產比例圖表</canvas>
         </div>
-        <hr class="divider">
-        <div class="section-tag">存款</div>
-        <div class="field-group">
-          <label class="field-label" for="input-bank">銀行存款 (NT$)</label>
-          <div class="field-input-wrap">
-            <span class="field-prefix">$</span>
-            <input type="number" id="input-bank" placeholder="0" min="0" inputmode="numeric" />
-          </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:#7ac47a"></div>台股</div><span class="legend-pct" id="l-stock">—</span></div>
+          <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:#f5c96b"></div>銀行(NTD)</div><span class="legend-pct" id="l-bank">—</span></div>
+          <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:#f5d88a"></div>美金存款</div><span class="legend-pct" id="l-usd">—</span></div>
+          <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:#f0a070"></div>幣圈</div><span class="legend-pct" id="l-crypto">—</span></div>
+          <div class="legend-item"><div class="legend-left"><div class="legend-dot" style="background:#8bc4e0"></div>其他</div><span class="legend-pct" id="l-other">—</span></div>
         </div>
-        <hr class="divider">
-        <div class="section-tag">其他</div>
-        <div class="field-group">
-          <label class="field-label" for="input-crypto">幣圈資產 (NT$)</label>
-          <div class="field-input-wrap">
-            <span class="field-prefix">$</span>
-            <input type="number" id="input-crypto" placeholder="0" min="0" inputmode="numeric" />
+      </div>
+
+      <!-- Form -->
+      <div class="panel">
+        <div class="panel-title">手動輸入資產</div>
+        <div class="form-grid">
+          <div class="section-tag">股市</div>
+          <div class="field-group">
+            <label class="field-label">台股總市值 (NTD)</label>
+            <div class="field-input-wrap">
+              <span class="field-prefix">$</span>
+              <input type="number" id="input-stock" placeholder="0" min="0" inputmode="numeric" />
+            </div>
           </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label" for="input-other">其他資產 (NT$)</label>
-          <div class="field-input-wrap">
-            <span class="field-prefix">$</span>
-            <input type="number" id="input-other" placeholder="0" min="0" inputmode="numeric" />
+          <hr class="divider">
+          <div class="section-tag">存款</div>
+          <div class="field-group">
+            <label class="field-label">銀行存款 (NTD)</label>
+            <div class="field-input-wrap">
+              <span class="field-prefix">$</span>
+              <input type="number" id="input-bank" placeholder="0" min="0" inputmode="numeric" />
+            </div>
           </div>
+          <div class="field-group">
+            <label class="field-label">美金存款 (USD)</label>
+            <div class="field-input-wrap">
+              <span class="field-prefix">$</span>
+              <input type="number" id="input-usd" placeholder="0" min="0" inputmode="numeric" />
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="section-tag">其他</div>
+          <div class="field-group">
+            <label class="field-label">幣圈資產</label>
+            <div class="field-row">
+              <div class="field-input-wrap">
+                <span class="field-prefix">$</span>
+                <input type="number" id="input-crypto" placeholder="0" min="0" inputmode="numeric" />
+              </div>
+              <select id="crypto-currency">
+                <option value="NTD">NTD</option>
+                <option value="USD">USD</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">其他資產 (NTD)</label>
+            <div class="field-input-wrap">
+              <span class="field-prefix">$</span>
+              <input type="number" id="input-other" placeholder="0" min="0" inputmode="numeric" />
+            </div>
+          </div>
+          <button class="btn-save" onclick="saveData()">儲存並更新</button>
+          <div class="saved-note" id="saved-note">✓ 資料已儲存</div>
+          <div class="last-saved" id="last-saved"></div>
+          <hr class="divider">
+          <button class="btn-change-pin" onclick="startChangePin()">變更 PIN 碼</button>
         </div>
-        <button class="btn-save" onclick="saveData()">儲存並更新</button>
-        <div class="saved-note" id="saved-note">✓ 資料已儲存</div>
-        <div class="last-saved" id="last-saved"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+/* ── EXCHANGE RATE ── */
+let usdToNtd = null;
+
+async function fetchRate() {
+  try {
+    const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=TWD');
+    const d = await r.json();
+    usdToNtd = d.rates.TWD;
+    const badge = document.getElementById('rate-badge');
+    badge.textContent = '1 USD ≈ ' + usdToNtd.toFixed(2) + ' NTD';
+    badge.className = 'rate-badge';
+    updateUIFromInputs();
+  } catch(e) {
+    const badge = document.getElementById('rate-badge');
+    badge.textContent = '匯率載入失敗';
+    badge.className = 'rate-badge loading';
+  }
 }
 
-const COLORS = ['#7ac47a','#f5c96b','#f0a070','#8bc4e0'];
+/* ── PIN LOGIC ── */
+let pinBuffer = '';
+let pinMode = 'unlock'; // unlock | setup1 | setup2 | change1 | change2 | change3
+let pinSetupFirst = '';
+let pinAttempts = 0;
+const MAX_ATTEMPTS = 5;
+
+function getPin() { return localStorage.getItem('appPin'); }
+function setPin(p) { localStorage.setItem('appPin', p); }
+
+function initPin() {
+  const locked = localStorage.getItem('pinLocked');
+  if (locked) { showLocked(); return; }
+  if (!getPin()) {
+    pinMode = 'setup1';
+    document.getElementById('pin-title').textContent = '設定 PIN 碼';
+    document.getElementById('pin-sub').textContent = '請輸入 4 位數字';
+  } else {
+    pinMode = 'unlock';
+    document.getElementById('pin-title').textContent = '輸入 PIN 碼';
+    document.getElementById('pin-sub').textContent = '';
+  }
+}
+
+function showLocked() {
+  document.getElementById('pin-title').textContent = '已鎖定';
+  document.getElementById('pin-sub').textContent = '';
+  document.querySelector('.pin-keypad').style.display = 'none';
+  document.querySelector('.pin-dots').style.display = 'none';
+  document.getElementById('pin-error').style.display = 'none';
+  const msg = document.createElement('div');
+  msg.className = 'pin-locked';
+  msg.textContent = '連續錯誤 ' + MAX_ATTEMPTS + ' 次，APP 已鎖定。\n請刪除 APP 重新安裝以重置。';
+  document.getElementById('pin-screen').appendChild(msg);
+}
+
+function pinInput(d) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += d;
+  updateDots();
+  if (pinBuffer.length === 4) setTimeout(processPIN, 120);
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updateDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function updateDots(err) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('d' + i);
+    dot.className = 'pin-dot';
+    if (err) dot.classList.add('error');
+    else if (i < pinBuffer.length) dot.classList.add('filled');
+  }
+}
+
+function processPIN() {
+  if (pinMode === 'setup1') {
+    pinSetupFirst = pinBuffer;
+    pinBuffer = '';
+    updateDots();
+    document.getElementById('pin-title').textContent = '再次確認 PIN 碼';
+    document.getElementById('pin-sub').textContent = '';
+    pinMode = 'setup2';
+  } else if (pinMode === 'setup2') {
+    if (pinBuffer === pinSetupFirst) {
+      setPin(pinBuffer);
+      pinBuffer = '';
+      unlockApp();
+    } else {
+      pinBuffer = '';
+      updateDots(true);
+      document.getElementById('pin-error').textContent = '兩次輸入不一致，請重新設定';
+      setTimeout(() => {
+        document.getElementById('pin-error').textContent = '';
+        updateDots();
+        pinMode = 'setup1';
+        document.getElementById('pin-title').textContent = '設定 PIN 碼';
+        document.getElementById('pin-sub').textContent = '請輸入 4 位數字';
+      }, 1200);
+    }
+  } else if (pinMode === 'unlock') {
+    if (pinBuffer === getPin()) {
+      pinAttempts = 0;
+      pinBuffer = '';
+      unlockApp();
+    } else {
+      pinAttempts++;
+      pinBuffer = '';
+      updateDots(true);
+      const left = MAX_ATTEMPTS - pinAttempts;
+      if (pinAttempts >= MAX_ATTEMPTS) {
+        localStorage.setItem('pinLocked', '1');
+        showLocked();
+      } else {
+        document.getElementById('pin-error').textContent = 'PIN 碼錯誤，還剩 ' + left + ' 次機會';
+        setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; }, 1000);
+      }
+    }
+  } else if (pinMode === 'change1') {
+    if (pinBuffer === getPin()) {
+      pinBuffer = '';
+      updateDots();
+      pinMode = 'change2';
+      document.getElementById('pin-title').textContent = '輸入新 PIN 碼';
+    } else {
+      pinBuffer = '';
+      updateDots(true);
+      document.getElementById('pin-error').textContent = '舊 PIN 碼錯誤';
+      setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; }, 1000);
+    }
+  } else if (pinMode === 'change2') {
+    pinSetupFirst = pinBuffer;
+    pinBuffer = '';
+    updateDots();
+    pinMode = 'change3';
+    document.getElementById('pin-title').textContent = '確認新 PIN 碼';
+  } else if (pinMode === 'change3') {
+    if (pinBuffer === pinSetupFirst) {
+      setPin(pinBuffer);
+      pinBuffer = '';
+      unlockApp();
+    } else {
+      pinBuffer = '';
+      updateDots(true);
+      document.getElementById('pin-error').textContent = '兩次輸入不一致';
+      setTimeout(() => {
+        updateDots();
+        document.getElementById('pin-error').textContent = '';
+        pinMode = 'change2';
+        document.getElementById('pin-title').textContent = '輸入新 PIN 碼';
+      }, 1200);
+    }
+  }
+}
+
+function unlockApp() {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  loadData();
+  fetchRate();
+}
+
+function lockApp() {
+  pinBuffer = '';
+  pinMode = 'unlock';
+  updateDots();
+  document.getElementById('pin-title').textContent = '輸入 PIN 碼';
+  document.getElementById('pin-sub').textContent = '';
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function startChangePin() {
+  pinBuffer = '';
+  pinMode = 'change1';
+  updateDots();
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-title').textContent = '輸入舊 PIN 碼';
+  document.getElementById('pin-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+/* ── CHART ── */
+const COLORS = ['#7ac47a','#f5c96b','#f5d88a','#f0a070','#8bc4e0'];
 let chart;
-
-function fmt(n) {
-  if (n >= 1e8) return (n/1e8).toFixed(1) + ' 億';
-  if (n >= 1e4) return (n/1e4).toFixed(1) + ' 萬';
-  return n.toLocaleString('zh-TW');
-}
-function pct(v, t) { return t ? (v/t*100).toFixed(1)+'%' : '0.0%'; }
 
 function initChart() {
   chart = new Chart(document.getElementById('assetChart').getContext('2d'), {
     type: 'doughnut',
     data: {
-      labels: ['台股總市值','銀行存款','幣圈資產','其他資產'],
-      datasets: [{ data:[1,1,1,1], backgroundColor:['#e8e6dc','#e8e6dc','#e8e6dc','#e8e6dc'], borderWidth:0, hoverOffset:6 }]
+      labels: ['台股','銀行NTD','美金','幣圈','其他'],
+      datasets: [{ data:[1,1,1,1,1], backgroundColor: Array(5).fill('#e8e6dc'), borderWidth:0, hoverOffset:6 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false, cutout: '68%',
@@ -284,38 +532,74 @@ function initChart() {
         legend: { display: false },
         tooltip: { callbacks: { label: ctx => {
           const v = ctx.raw, t = ctx.dataset.data.reduce((a,b)=>a+b,0);
-          return ' NT$ ' + v.toLocaleString('zh-TW') + '  (' + (v/t*100).toFixed(1) + '%)';
+          return ' NT$ ' + Math.round(v).toLocaleString('zh-TW') + ' (' + (v/t*100).toFixed(1) + '%)';
         }}}
       }
     }
   });
 }
 
-function updateUI(s, b, c, o) {
-  const t = s+b+c+o, has = t > 0;
-  document.getElementById('c-total').textContent   = has ? fmt(t) : '—';
-  document.getElementById('c-stock').textContent   = has ? fmt(s) : '—';
-  document.getElementById('c-bank').textContent    = has ? fmt(b) : '—';
-  document.getElementById('c-crypto').textContent  = has ? fmt(c) : '—';
-  document.getElementById('c-other').textContent   = has ? fmt(o) : '—';
-  ['stock','bank','crypto','other'].forEach((k,i) => {
-    const v = [s,b,c,o][i];
-    document.getElementById('c-'+k+'-pct').textContent = has ? pct(v,t) : '—%';
-    document.getElementById('l-'+k).textContent = has ? pct(v,t) : '—';
+/* ── DATA ── */
+function fmt(n) {
+  n = Math.round(n);
+  if (n >= 1e8) return (n/1e8).toFixed(2) + ' 億';
+  if (n >= 1e4) return (n/1e4).toFixed(1) + ' 萬';
+  return n.toLocaleString('zh-TW');
+}
+function pct(v, t) { return t ? (v/t*100).toFixed(1)+'%' : '0.0%'; }
+
+function updateUIFromInputs() {
+  const stock  = parseFloat(document.getElementById('input-stock').value)  || 0;
+  const bank   = parseFloat(document.getElementById('input-bank').value)   || 0;
+  const usdAmt = parseFloat(document.getElementById('input-usd').value)    || 0;
+  const cryptoRaw = parseFloat(document.getElementById('input-crypto').value) || 0;
+  const cryptoCur = document.getElementById('crypto-currency').value;
+  const other  = parseFloat(document.getElementById('input-other').value)  || 0;
+
+  const rate = usdToNtd || 32;
+  const usdNtd = usdAmt * rate;
+  const cryptoNtd = cryptoCur === 'USD' ? cryptoRaw * rate : cryptoRaw;
+
+  updateUI(stock, bank, usdAmt, usdNtd, cryptoNtd, other, rate);
+}
+
+function updateUI(stock, bank, usdAmt, usdNtd, cryptoNtd, other, rate) {
+  const total = stock + bank + usdNtd + cryptoNtd + other;
+  const has = total > 0;
+
+  document.getElementById('c-total').textContent   = has ? fmt(total) : '—';
+  document.getElementById('c-total-usd').textContent = has && rate ? '≈ USD ' + Math.round(total/rate).toLocaleString() : '—';
+  document.getElementById('c-stock').textContent   = has ? fmt(stock) : '—';
+  document.getElementById('c-bank').textContent    = has ? fmt(bank)  : '—';
+  document.getElementById('c-usd').textContent     = has ? 'USD ' + usdAmt.toLocaleString() : '—';
+  document.getElementById('c-usd-ntd').textContent = has ? '≈ NTD ' + fmt(usdNtd) : '—';
+  document.getElementById('c-crypto').textContent  = has ? fmt(cryptoNtd) : '—';
+  document.getElementById('c-other').textContent   = has ? fmt(other)  : '—';
+
+  const vals = [stock, bank, usdNtd, cryptoNtd, other];
+  const keys = ['stock','bank','usd','crypto','other'];
+  keys.forEach((k,i) => {
+    document.getElementById('c-'+k+'-pct') && (document.getElementById('c-'+k+'-pct').textContent = has ? pct(vals[i], total) : '—%');
+    document.getElementById('l-'+k).textContent = has ? pct(vals[i], total) : '—';
   });
-  chart.data.datasets[0].data = has ? [s,b,c,o] : [1,1,1,1];
-  chart.data.datasets[0].backgroundColor = has ? COLORS : ['#e8e6dc','#e8e6dc','#e8e6dc','#e8e6dc'];
+
+  chart.data.datasets[0].data = has ? vals : [1,1,1,1,1];
+  chart.data.datasets[0].backgroundColor = has ? COLORS : Array(5).fill('#e8e6dc');
   chart.update();
 }
 
 function saveData() {
-  const s = parseFloat(document.getElementById('input-stock').value)  || 0;
-  const b = parseFloat(document.getElementById('input-bank').value)   || 0;
-  const c = parseFloat(document.getElementById('input-crypto').value) || 0;
-  const o = parseFloat(document.getElementById('input-other').value)  || 0;
+  const stock  = parseFloat(document.getElementById('input-stock').value)  || 0;
+  const bank   = parseFloat(document.getElementById('input-bank').value)   || 0;
+  const usd    = parseFloat(document.getElementById('input-usd').value)    || 0;
+  const crypto = parseFloat(document.getElementById('input-crypto').value) || 0;
+  const cryptoCur = document.getElementById('crypto-currency').value;
+  const other  = parseFloat(document.getElementById('input-other').value)  || 0;
   const now = new Date().toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
-  localStorage.setItem('assetData', JSON.stringify({ s, b, c, o, savedAt: now }));
-  updateUI(s, b, c, o);
+
+  localStorage.setItem('assetData3', JSON.stringify({ stock, bank, usd, crypto, cryptoCur, other, savedAt: now }));
+  updateUIFromInputs();
+
   document.getElementById('last-saved').textContent = '上次儲存：' + now;
   const note = document.getElementById('saved-note');
   note.classList.add('show');
@@ -324,19 +608,21 @@ function saveData() {
 
 function loadData() {
   try {
-    const d = JSON.parse(localStorage.getItem('assetData'));
+    const d = JSON.parse(localStorage.getItem('assetData3'));
     if (!d) return;
-    document.getElementById('input-stock').value  = d.s || '';
-    document.getElementById('input-bank').value   = d.b || '';
-    document.getElementById('input-crypto').value = d.c || '';
-    document.getElementById('input-other').value  = d.o || '';
+    document.getElementById('input-stock').value  = d.stock  || '';
+    document.getElementById('input-bank').value   = d.bank   || '';
+    document.getElementById('input-usd').value    = d.usd    || '';
+    document.getElementById('input-crypto').value = d.crypto || '';
+    document.getElementById('crypto-currency').value = d.cryptoCur || 'NTD';
+    document.getElementById('input-other').value  = d.other  || '';
     if (d.savedAt) document.getElementById('last-saved').textContent = '上次儲存：' + d.savedAt;
-    updateUI(d.s||0, d.b||0, d.c||0, d.o||0);
+    updateUIFromInputs();
   } catch(e) {}
 }
 
 initChart();
-loadData();
+initPin();
 </script>
 </body>
 </html>
