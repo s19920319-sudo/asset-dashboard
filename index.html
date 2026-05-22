@@ -282,9 +282,19 @@ select:focus { border-color: #f0a070; }
           <div class="section-tag">存款</div>
           <div class="field-group">
             <label class="field-label">銀行存款 (NTD)</label>
+            <select id="bank-select" onchange="switchBank(this.value)" style="width:100%; margin-bottom:6px;">
+              <option value="cathay">國泰世華</option>
+              <option value="mega">兆豐銀行</option>
+              <option value="obank">王道銀行</option>
+            </select>
             <div class="field-input-wrap">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-bank" placeholder="0" min="0" inputmode="numeric" />
+              <input type="number" id="input-bank-cathay" placeholder="0" min="0" inputmode="numeric" oninput="updateBankTotal()" />
+              <input type="number" id="input-bank-mega"   placeholder="0" min="0" inputmode="numeric" oninput="updateBankTotal()" style="display:none;" />
+              <input type="number" id="input-bank-obank"  placeholder="0" min="0" inputmode="numeric" oninput="updateBankTotal()" style="display:none;" />
+            </div>
+            <div style="font-size:11px; color:#888780; margin-top:4px;">
+              小計 — 國泰：<span id="sub-cathay">0</span>　兆豐：<span id="sub-mega">0</span>　王道：<span id="sub-obank">0</span>
             </div>
           </div>
           <div class="field-group">
@@ -555,20 +565,7 @@ function fmt(n) {
 }
 function pct(v, t) { return t ? (v/t*100).toFixed(1)+'%' : '0.0%'; }
 
-function updateUIFromInputs() {
-  const stock  = parseFloat(document.getElementById('input-stock').value)  || 0;
-  const bank   = parseFloat(document.getElementById('input-bank').value)   || 0;
-  const usdAmt = parseFloat(document.getElementById('input-usd').value)    || 0;
-  const cryptoRaw = parseFloat(document.getElementById('input-crypto').value) || 0;
-  const cryptoCur = document.getElementById('crypto-currency').value;
-  const other  = parseFloat(document.getElementById('input-other').value)  || 0;
 
-  const rate = usdToNtd || 32;
-  const usdNtd = usdAmt * rate;
-  const cryptoNtd = cryptoCur === 'USD' ? cryptoRaw * rate : cryptoRaw;
-
-  updateUI(stock, bank, usdAmt, usdNtd, cryptoNtd, other, rate);
-}
 
 function updateUI(stock, bank, usdAmt, usdNtd, cryptoNtd, other, rate) {
   const total = stock + bank + usdNtd + cryptoNtd + other;
@@ -595,17 +592,56 @@ function updateUI(stock, bank, usdAmt, usdNtd, cryptoNtd, other, rate) {
   chart.update();
 }
 
+function getBankTotal() {
+  return ['cathay','mega','obank'].reduce((sum, k) => {
+    return sum + (parseFloat(document.getElementById('input-bank-'+k).value) || 0);
+  }, 0);
+}
+
+function updateBankTotal() {
+  ['cathay','mega','obank'].forEach(k => {
+    const v = parseFloat(document.getElementById('input-bank-'+k).value) || 0;
+    document.getElementById('sub-'+k).textContent = v ? fmt(v) : '0';
+  });
+  updateUIFromInputs();
+}
+
+function switchBank(k) {
+  ['cathay','mega','obank'].forEach(b => {
+    document.getElementById('input-bank-'+b).style.display = b === k ? '' : 'none';
+  });
+}
+
+function updateUIFromInputs() {
+  const stock     = parseFloat(document.getElementById('input-stock').value)  || 0;
+  const bank      = getBankTotal();
+  const usdAmt    = parseFloat(document.getElementById('input-usd').value)    || 0;
+  const cryptoRaw = parseFloat(document.getElementById('input-crypto').value) || 0;
+  const cryptoCur = document.getElementById('crypto-currency').value;
+  const other     = parseFloat(document.getElementById('input-other').value)  || 0;
+
+  const rate = usdToNtd || 32;
+  const usdNtd   = usdAmt * rate;
+  const cryptoNtd = cryptoCur === 'USD' ? cryptoRaw * rate : cryptoRaw;
+  updateUI(stock, bank, usdAmt, usdNtd, cryptoNtd, other, rate);
+}
+
 function saveData() {
   const stock  = parseFloat(document.getElementById('input-stock').value)  || 0;
-  const bank   = parseFloat(document.getElementById('input-bank').value)   || 0;
+  const bankCathay = parseFloat(document.getElementById('input-bank-cathay').value) || 0;
+  const bankMega   = parseFloat(document.getElementById('input-bank-mega').value)   || 0;
+  const bankObank  = parseFloat(document.getElementById('input-bank-obank').value)  || 0;
   const usd    = parseFloat(document.getElementById('input-usd').value)    || 0;
   const crypto = parseFloat(document.getElementById('input-crypto').value) || 0;
   const cryptoCur = document.getElementById('crypto-currency').value;
   const other  = parseFloat(document.getElementById('input-other').value)  || 0;
   const now = new Date().toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
 
-  localStorage.setItem('assetData3', JSON.stringify({ stock, bank, usd, crypto, cryptoCur, other, savedAt: now }));
+  localStorage.setItem('assetData3', JSON.stringify({
+    stock, bankCathay, bankMega, bankObank, usd, crypto, cryptoCur, other, savedAt: now
+  }));
   updateUIFromInputs();
+  updateBankTotal();
 
   document.getElementById('last-saved').textContent = '上次儲存：' + now;
   const note = document.getElementById('saved-note');
@@ -618,12 +654,15 @@ function loadData() {
     const d = JSON.parse(localStorage.getItem('assetData3'));
     if (!d) return;
     document.getElementById('input-stock').value  = d.stock  || '';
-    document.getElementById('input-bank').value   = d.bank   || '';
+    document.getElementById('input-bank-cathay').value = d.bankCathay || '';
+    document.getElementById('input-bank-mega').value   = d.bankMega   || '';
+    document.getElementById('input-bank-obank').value  = d.bankObank  || '';
     document.getElementById('input-usd').value    = d.usd    || '';
     document.getElementById('input-crypto').value = d.crypto || '';
     document.getElementById('crypto-currency').value = d.cryptoCur || 'NTD';
     document.getElementById('input-other').value  = d.other  || '';
     if (d.savedAt) document.getElementById('last-saved').textContent = '上次儲存：' + d.savedAt;
+    updateBankTotal();
     updateUIFromInputs();
   } catch(e) {}
 }
