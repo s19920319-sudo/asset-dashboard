@@ -582,6 +582,11 @@ function loadData() {
     chart.data.datasets[0].backgroundColor = has ? COLORS : Array(5).fill('#e8e6dc');
     chart.update();
 
+    // 更新銀行小計顯示
+    document.getElementById('sub-cathay').textContent = d.cathay ? fmt(d.cathay) : '0';
+    document.getElementById('sub-mega').textContent   = d.mega   ? fmt(d.mega)   : '0';
+    document.getElementById('sub-obank').textContent  = d.obank  ? fmt(d.obank)  : '0';
+
     if (d.savedAt) document.getElementById('last-saved').textContent = '上次儲存：' + d.savedAt;
   } catch(e) {}
 }
