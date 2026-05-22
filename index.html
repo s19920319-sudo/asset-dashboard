@@ -208,7 +208,7 @@ select:focus { border-color: #f0a070; }
       <span>Asset Dashboard</span>
     </div>
     <div class="header-right">
-      <div class="rate-badge loading" id="rate-badge">匯率載入中…</div>
+      <div class="rate-badge" id="rate-badge" onclick="promptRate()" style="cursor:pointer;">1 USD = 32.00 NTD ✎</div>
       <button class="btn-lock" onclick="lockApp()">鎖定</button>
     </div>
   </div>
@@ -331,43 +331,28 @@ select:focus { border-color: #f0a070; }
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 /* ── EXCHANGE RATE ── */
-let usdToNtd = null;
+let usdToNtd = parseFloat(localStorage.getItem('manualRate')) || 32;
 
-async function fetchRate() {
+function loadRate() {
+  const saved = parseFloat(localStorage.getItem('manualRate'));
+  if (saved) usdToNtd = saved;
+  updateRateBadge();
+}
+
+function updateRateBadge() {
   const badge = document.getElementById('rate-badge');
-  const apis = [
-    async () => {
-      const r = await fetch('https://open.er-api.com/v6/latest/USD');
-      const d = await r.json();
-      return d.rates.TWD;
-    },
-    async () => {
-      const r = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-      const d = await r.json();
-      return d.rates.TWD;
-    },
-    async () => {
-      const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=TWD');
-      const d = await r.json();
-      return d.rates.TWD;
-    }
-  ];
-  for (const api of apis) {
-    try {
-      const rate = await api();
-      if (rate && rate > 20) {
-        usdToNtd = rate;
-        badge.textContent = '1 USD ≈ ' + usdToNtd.toFixed(2) + ' NTD';
-        badge.className = 'rate-badge';
-        updateUIFromInputs();
-        return;
-      }
-    } catch(e) { continue; }
-  }
-  // 全部失敗時使用備用匯率
-  usdToNtd = 32;
-  badge.textContent = '匯率參考值 32 NTD';
-  badge.className = 'rate-badge loading';
+  badge.textContent = '1 USD = ' + usdToNtd.toFixed(2) + ' NTD ✎';
+  badge.className = 'rate-badge';
+}
+
+function promptRate() {
+  const val = prompt('請輸入目前匯率（1 USD = ? NTD）：', usdToNtd.toFixed(2));
+  if (val === null) return;
+  const n = parseFloat(val);
+  if (!n || n < 10 || n > 100) { alert('請輸入合理的匯率（例如 32.5）'); return; }
+  usdToNtd = n;
+  localStorage.setItem('manualRate', n);
+  updateRateBadge();
   updateUIFromInputs();
 }
 
@@ -512,8 +497,8 @@ function processPIN() {
 function unlockApp() {
   document.getElementById('pin-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  loadRate();
   loadData();
-  fetchRate();
 }
 
 function lockApp() {
