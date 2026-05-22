@@ -15,7 +15,6 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f7f6f0; color: #2c2c2a; min-height: 100vh; }
 
-/* ── PIN SCREEN ── */
 #pin-screen { position: fixed; inset: 0; background: #f7f6f0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; z-index: 100; }
 .pin-title { font-size: 20px; font-weight: 500; }
 .pin-sub { font-size: 13px; color: #888780; margin-top: -16px; min-height: 18px; }
@@ -31,18 +30,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .pin-error-msg { font-size: 13px; color: #e24b4a; min-height: 18px; }
 .pin-locked { font-size: 14px; color: #e24b4a; text-align: center; line-height: 1.8; }
 
-/* ── APP ── */
 #app { display: none; }
 .header { background: #fff; border-bottom: 1px solid #e8e6dc; padding: 14px 16px 12px; display: flex; align-items: center; justify-content: space-between; }
 .header h1 { font-size: 17px; font-weight: 500; letter-spacing: -0.3px; }
 .header span { font-size: 11px; color: #888780; }
 .header-right { display: flex; align-items: center; gap: 8px; }
-.rate-badge { font-size: 11px; color: #639922; background: #f4faf4; border: 1px solid #d4ecd4; border-radius: 6px; padding: 4px 9px; cursor: pointer; user-select: none; }
+.rate-badge { font-size: 11px; color: #639922; background: #f4faf4; border: 1px solid #d4ecd4; border-radius: 6px; padding: 4px 9px; cursor: pointer; user-select: none; white-space: nowrap; }
 .btn-lock { font-size: 12px; color: #888780; background: none; border: 1px solid #e8e6dc; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 
 .main { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
-
-/* ── CARDS ── */
 .cards-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .card { background: #fff; border: 1px solid #e8e6dc; border-radius: 12px; padding: 11px 12px; position: relative; overflow: hidden; }
 .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 12px 12px 0 0; }
@@ -56,20 +52,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .card-value { font-size: 15px; font-weight: 500; color: #2c2c2a; letter-spacing: -0.4px; line-height: 1.2; }
 .card-sub   { font-size: 10px; color: #b4b2a9; margin-top: 2px; }
 
-/* ── CONTENT ── */
 .content-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
 @media (max-width: 520px) { .content-row { grid-template-columns: 1fr; } }
 .panel { background: #fff; border: 1px solid #e8e6dc; border-radius: 14px; padding: 16px; }
 .panel-title { font-size: 13px; font-weight: 500; color: #444441; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #f0ede4; }
 
-/* ── LEGEND ── */
 .legend { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
 .legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #5f5e5a; }
 .legend-left { display: flex; align-items: center; gap: 6px; }
 .legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
 .legend-pct { font-weight: 500; color: #2c2c2a; font-size: 11px; }
 
-/* ── FORM ── */
 .form-grid { display: flex; flex-direction: column; gap: 10px; }
 .field-group { display: flex; flex-direction: column; gap: 4px; }
 .field-label { font-size: 11px; color: #888780; }
@@ -79,10 +72,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 input[type="number"] { width: 100%; padding: 8px 8px 8px 26px; border: 1px solid #e8e6dc; border-radius: 8px; font-size: 13px; color: #2c2c2a; background: #fafaf7; outline: none; transition: border-color 0.15s; -moz-appearance: textfield; }
 input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 input[type="number"]:focus { border-color: #7ac47a; background: #fff; }
-select { padding: 8px 6px; border: 1px solid #e8e6dc; border-radius: 8px; font-size: 12px; color: #2c2c2a; background: #fafaf7; outline: none; cursor: pointer; }
-select:focus { border-color: #f5c96b; }
-.bank-subtotal { font-size: 10px; color: #888780; margin-top: 2px; line-height: 1.6; }
-.bank-subtotal span { color: #2c2c2a; font-weight: 500; }
+select { padding: 8px 6px; border: 1px solid #e8e6dc; border-radius: 8px; font-size: 12px; color: #2c2c2a; background: #fafaf7; outline: none; cursor: pointer; width: 100%; }
+.bank-subtotal { font-size: 10px; color: #888780; margin-top: 3px; line-height: 1.8; }
+.bank-subtotal b { color: #2c2c2a; font-weight: 500; }
 .divider { border: none; border-top: 1px dashed #ede9de; margin: 2px 0; }
 .section-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.4px; color: #b4b2a9; text-transform: uppercase; margin-bottom: -4px; }
 .btn-save { margin-top: 2px; width: 100%; padding: 10px; background: #2c2c2a; color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.1s; }
@@ -91,13 +83,12 @@ select:focus { border-color: #f5c96b; }
 .saved-note { font-size: 11px; color: #639922; text-align: center; margin-top: 4px; height: 14px; opacity: 0; transition: opacity 0.3s; }
 .saved-note.show { opacity: 1; }
 .last-saved { font-size: 10px; color: #b4b2a9; text-align: right; margin-top: -6px; }
-.btn-change-pin { width: 100%; padding: 8px; background: none; border: 1px dashed #e8e6dc; border-radius: 8px; font-size: 12px; color: #b4b2a9; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
-.btn-change-pin:hover { border-color: #888780; color: #5f5e5a; }
+.btn-sub { width: 100%; padding: 8px; background: none; border: 1px dashed #e8e6dc; border-radius: 8px; font-size: 12px; color: #b4b2a9; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+.btn-sub:hover { border-color: #888780; color: #5f5e5a; }
 </style>
 </head>
 <body>
 
-<!-- ── PIN SCREEN ── -->
 <div id="pin-screen">
   <div class="pin-title" id="pin-title">輸入 PIN 碼</div>
   <div class="pin-sub" id="pin-sub"></div>
@@ -122,7 +113,6 @@ select:focus { border-color: #f5c96b; }
   </div>
 </div>
 
-<!-- ── MAIN APP ── -->
 <div id="app">
   <div class="header">
     <div>
@@ -136,7 +126,6 @@ select:focus { border-color: #f5c96b; }
   </div>
 
   <div class="main">
-    <!-- Row 1: 總資產、台股、銀行NTD -->
     <div class="cards-row">
       <div class="card total">
         <div class="card-label">總資產（NTD）</div>
@@ -154,7 +143,6 @@ select:focus { border-color: #f5c96b; }
         <div class="card-sub" id="c-bank-pct">—%</div>
       </div>
     </div>
-    <!-- Row 2: 美金、幣圈、其他 -->
     <div class="cards-row">
       <div class="card bankusd">
         <div class="card-label">美金存款（USD）</div>
@@ -174,7 +162,6 @@ select:focus { border-color: #f5c96b; }
     </div>
 
     <div class="content-row">
-      <!-- Chart -->
       <div class="panel">
         <div class="panel-title">資產配置比例</div>
         <div style="position:relative;width:100%;height:170px;">
@@ -189,7 +176,6 @@ select:focus { border-color: #f5c96b; }
         </div>
       </div>
 
-      <!-- Form -->
       <div class="panel">
         <div class="panel-title">手動輸入資產</div>
         <div class="form-grid">
@@ -199,14 +185,13 @@ select:focus { border-color: #f5c96b; }
             <label class="field-label">台股總市值 (NTD)</label>
             <div class="field-input-wrap">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-stock" placeholder="0" min="0" inputmode="numeric">
+              <input type="number" id="input-stock" placeholder="空白=不更新" min="0" inputmode="numeric">
             </div>
           </div>
 
           <hr class="divider">
           <div class="section-tag">存款</div>
 
-          <!-- 銀行下拉 -->
           <div class="field-group">
             <label class="field-label">銀行存款 (NTD)</label>
             <select id="bank-select" onchange="switchBank(this.value)">
@@ -216,48 +201,45 @@ select:focus { border-color: #f5c96b; }
             </select>
             <div style="position:relative; margin-top:6px;">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-bank-cathay" placeholder="0" min="0" inputmode="numeric">
-              <input type="number" id="input-bank-mega"   placeholder="0" min="0" inputmode="numeric" style="display:none;">
-              <input type="number" id="input-bank-obank"  placeholder="0" min="0" inputmode="numeric" style="display:none;">
+              <input type="number" id="input-bank-cathay" placeholder="空白=不更新" min="0" inputmode="numeric">
+              <input type="number" id="input-bank-mega"   placeholder="空白=不更新" min="0" inputmode="numeric" style="display:none;">
+              <input type="number" id="input-bank-obank"  placeholder="空白=不更新" min="0" inputmode="numeric" style="display:none;">
             </div>
             <div class="bank-subtotal">
-              國泰：<span id="sub-cathay">0</span>　兆豐：<span id="sub-mega">0</span>　王道：<span id="sub-obank">0</span>
+              國泰：<b id="sub-cathay">0</b>　兆豐：<b id="sub-mega">0</b>　王道：<b id="sub-obank">0</b>
             </div>
           </div>
 
-          <!-- 美金 -->
           <div class="field-group">
             <label class="field-label">美金存款 (USD)</label>
             <div class="field-input-wrap">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-usd" placeholder="0" min="0" inputmode="numeric">
+              <input type="number" id="input-usd" placeholder="空白=不更新" min="0" inputmode="numeric">
             </div>
           </div>
 
           <hr class="divider">
           <div class="section-tag">其他</div>
 
-          <!-- 幣圈 -->
           <div class="field-group">
             <label class="field-label">幣圈資產</label>
             <div class="field-row">
               <div class="field-input-wrap">
                 <span class="field-prefix">$</span>
-                <input type="number" id="input-crypto" placeholder="0" min="0" inputmode="numeric">
+                <input type="number" id="input-crypto" placeholder="空白=不更新" min="0" inputmode="numeric">
               </div>
-              <select id="crypto-currency">
+              <select id="crypto-currency" style="width:80px;">
                 <option value="NTD">NTD</option>
                 <option value="USD">USD</option>
               </select>
             </div>
           </div>
 
-          <!-- 其他 -->
           <div class="field-group">
             <label class="field-label">其他資產 (NTD)</label>
             <div class="field-input-wrap">
               <span class="field-prefix">$</span>
-              <input type="number" id="input-other" placeholder="0" min="0" inputmode="numeric">
+              <input type="number" id="input-other" placeholder="空白=不更新" min="0" inputmode="numeric">
             </div>
           </div>
 
@@ -265,12 +247,12 @@ select:focus { border-color: #f5c96b; }
           <div class="saved-note" id="saved-note">✓ 資料已儲存</div>
           <div class="last-saved" id="last-saved"></div>
           <hr class="divider">
-          <div style="display:flex; gap:8px;">
-            <button class="btn-change-pin" style="flex:1;" onclick="exportData()">📤 匯出資料</button>
-            <button class="btn-change-pin" style="flex:1;" onclick="importData()">📥 匯入資料</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-sub" style="flex:1;" onclick="exportData()">📤 匯出</button>
+            <button class="btn-sub" style="flex:1;" onclick="importData()">📥 匯入</button>
           </div>
           <hr class="divider">
-          <button class="btn-change-pin" onclick="startChangePin()">變更 PIN 碼</button>
+          <button class="btn-sub" onclick="startChangePin()">變更 PIN 碼</button>
         </div>
       </div>
     </div>
@@ -280,7 +262,7 @@ select:focus { border-color: #f5c96b; }
 <script>
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
-/* ── RATE ── */
+/* ── 匯率 ── */
 let usdToNtd = parseFloat(localStorage.getItem('manualRate')) || 32;
 
 function updateRateBadge() {
@@ -295,13 +277,12 @@ function promptRate() {
   usdToNtd = n;
   localStorage.setItem('manualRate', n);
   updateRateBadge();
-  updateUIFromInputs();
+  renderCards();
 }
 
 /* ── PIN ── */
 let pinBuffer = '', pinMode = 'unlock', pinSetupFirst = '', pinAttempts = 0;
 const MAX_ATT = 5;
-
 function getPin() { return localStorage.getItem('appPin'); }
 function setPin(p) { localStorage.setItem('appPin', p); }
 
@@ -331,79 +312,54 @@ function showLocked() {
 
 function pinInput(d) {
   if (pinBuffer.length >= 4) return;
-  pinBuffer += d;
-  updateDots();
+  pinBuffer += d; updateDots();
   if (pinBuffer.length === 4) setTimeout(processPIN, 150);
 }
-
 function pinDel() {
-  pinBuffer = pinBuffer.slice(0, -1);
-  updateDots();
+  pinBuffer = pinBuffer.slice(0, -1); updateDots();
   document.getElementById('pin-error').textContent = '';
 }
-
 function updateDots(err) {
   for (let i = 0; i < 4; i++) {
     const dot = document.getElementById('d' + i);
     dot.className = 'pin-dot' + (err ? ' error' : i < pinBuffer.length ? ' filled' : '');
   }
 }
-
 function processPIN() {
-  const buf = pinBuffer;
-  pinBuffer = '';
-
+  const buf = pinBuffer; pinBuffer = '';
   if (pinMode === 'setup1') {
     pinSetupFirst = buf; updateDots();
     document.getElementById('pin-title').textContent = '再次確認 PIN 碼';
     document.getElementById('pin-sub').textContent = '';
     pinMode = 'setup2';
-
   } else if (pinMode === 'setup2') {
     if (buf === pinSetupFirst) { setPin(buf); unlockApp(); }
-    else {
-      updateDots(true);
-      document.getElementById('pin-error').textContent = '兩次不一致，請重新設定';
-      setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; pinMode = 'setup1'; document.getElementById('pin-title').textContent = '設定 PIN 碼'; document.getElementById('pin-sub').textContent = '請輸入 4 位數字'; }, 1200);
-    }
-
+    else { updateDots(true); document.getElementById('pin-error').textContent = '兩次不一致，請重新設定'; setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; pinMode = 'setup1'; document.getElementById('pin-title').textContent = '設定 PIN 碼'; document.getElementById('pin-sub').textContent = '請輸入 4 位數字'; }, 1200); }
   } else if (pinMode === 'unlock') {
     if (buf === getPin()) { pinAttempts = 0; unlockApp(); }
     else {
       pinAttempts++;
       updateDots(true);
       if (pinAttempts >= MAX_ATT) { localStorage.setItem('pinLocked', '1'); showLocked(); }
-      else {
-        document.getElementById('pin-error').textContent = 'PIN 碼錯誤，還剩 ' + (MAX_ATT - pinAttempts) + ' 次';
-        setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; }, 1000);
-      }
+      else { document.getElementById('pin-error').textContent = 'PIN 碼錯誤，還剩 ' + (MAX_ATT - pinAttempts) + ' 次'; setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; }, 1000); }
     }
-
   } else if (pinMode === 'change1') {
     if (buf === getPin()) { updateDots(); pinMode = 'change2'; document.getElementById('pin-title').textContent = '輸入新 PIN 碼'; }
     else { updateDots(true); document.getElementById('pin-error').textContent = '舊 PIN 碼錯誤'; setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; }, 1000); }
-
   } else if (pinMode === 'change2') {
     pinSetupFirst = buf; updateDots(); pinMode = 'change3';
     document.getElementById('pin-title').textContent = '確認新 PIN 碼';
-
   } else if (pinMode === 'change3') {
     if (buf === pinSetupFirst) { setPin(buf); unlockApp(); }
-    else {
-      updateDots(true);
-      document.getElementById('pin-error').textContent = '兩次不一致';
-      setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; pinMode = 'change2'; document.getElementById('pin-title').textContent = '輸入新 PIN 碼'; }, 1200);
-    }
+    else { updateDots(true); document.getElementById('pin-error').textContent = '兩次不一致'; setTimeout(() => { updateDots(); document.getElementById('pin-error').textContent = ''; pinMode = 'change2'; document.getElementById('pin-title').textContent = '輸入新 PIN 碼'; }, 1200); }
   }
 }
-
 function unlockApp() {
   document.getElementById('pin-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   updateRateBadge();
-  loadData();
+  renderCards();
 }
-
 function lockApp() {
   pinBuffer = ''; pinMode = 'unlock'; updateDots();
   document.getElementById('pin-title').textContent = '輸入 PIN 碼';
@@ -412,7 +368,6 @@ function lockApp() {
   document.getElementById('pin-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
 }
-
 function startChangePin() {
   pinBuffer = ''; pinMode = 'change1'; updateDots();
   document.getElementById('pin-error').textContent = '';
@@ -422,38 +377,25 @@ function startChangePin() {
   document.getElementById('app').style.display = 'none';
 }
 
-/* ── BANK ── */
+/* ── 銀行切換 ── */
 function switchBank(k) {
   ['cathay','mega','obank'].forEach(b => {
     document.getElementById('input-bank-' + b).style.display = b === k ? '' : 'none';
   });
 }
 
-function getBankTotal() {
-  return ['cathay','mega','obank'].reduce((s, k) => s + (parseFloat(document.getElementById('input-bank-' + k).value) || 0), 0);
-}
-
-function updateBankTotal() {
-  ['cathay','mega','obank'].forEach(k => {
-    const v = parseFloat(document.getElementById('input-bank-' + k).value) || 0;
-    document.getElementById('sub-' + k).textContent = v ? fmt(v) : '0';
-  });
-  updateUIFromInputs();
-}
-
-/* ── CHART ── */
+/* ── 圖表 ── */
 const COLORS = ['#7ac47a','#f5c96b','#f5d88a','#f0a070','#8bc4e0'];
 let chart;
-
 function initChart() {
   chart = new Chart(document.getElementById('assetChart').getContext('2d'), {
     type: 'doughnut',
     data: { labels: ['台股','銀行NTD','美金','幣圈','其他'], datasets: [{ data:[1,1,1,1,1], backgroundColor: Array(5).fill('#e8e6dc'), borderWidth:0, hoverOffset:6 }] },
-    options: { responsive:true, maintainAspectRatio:false, cutout:'68%', plugins: { legend:{display:false}, tooltip:{ callbacks:{ label: ctx => { const v=ctx.raw, t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ' NT$ '+Math.round(v).toLocaleString('zh-TW')+' ('+((v/t)*100).toFixed(1)+'%)'; }}}}}
+    options: { responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => { const v=ctx.raw, t=ctx.dataset.data.reduce((a,b)=>a+b,0); return ' NT$ '+Math.round(v).toLocaleString('zh-TW')+' ('+((v/t)*100).toFixed(1)+'%)'; }}}}}
   });
 }
 
-/* ── UI ── */
+/* ── 格式化 ── */
 function fmt(n) {
   n = Math.round(n);
   if (n >= 1e8) return (n/1e8).toFixed(2) + ' 億';
@@ -462,161 +404,119 @@ function fmt(n) {
 }
 function pct(v, t) { return t ? (v/t*100).toFixed(1)+'%' : '0.0%'; }
 
-function updateUIFromInputs() {
-  const stock     = parseFloat(document.getElementById('input-stock').value) || 0;
-  const bank      = getBankTotal();
-  const usdAmt    = parseFloat(document.getElementById('input-usd').value) || 0;
-  const cryptoRaw = parseFloat(document.getElementById('input-crypto').value) || 0;
-  const cryptoCur = document.getElementById('crypto-currency').value;
-  const other     = parseFloat(document.getElementById('input-other').value) || 0;
+/* ── 讀取儲存的資料 ── */
+function getData() {
+  try { return JSON.parse(localStorage.getItem('assetData4')) || {}; } catch(e) { return {}; }
+}
+
+/* ── 顯示卡片與圖表 ── */
+function renderCards() {
+  const d = getData();
   const rate      = usdToNtd || 32;
+  const stock     = d.stock  || 0;
+  const cathay    = d.cathay || 0;
+  const mega      = d.mega   || 0;
+  const obank     = d.obank  || 0;
+  const bank      = cathay + mega + obank;
+  const usdAmt    = d.usd    || 0;
   const usdNtd    = usdAmt * rate;
-  const cryptoNtd = cryptoCur === 'USD' ? cryptoRaw * rate : cryptoRaw;
+  const cryptoRaw = d.crypto || 0;
+  const cryptoNtd = (d.cryptoCur === 'USD') ? cryptoRaw * rate : cryptoRaw;
+  const other     = d.other  || 0;
   const total     = stock + bank + usdNtd + cryptoNtd + other;
   const has       = total > 0;
 
   document.getElementById('c-total').textContent     = has ? fmt(total) : '—';
   document.getElementById('c-total-usd').textContent = has ? '≈ USD ' + Math.round(total/rate).toLocaleString() : '—';
   document.getElementById('c-stock').textContent     = has ? fmt(stock) : '—';
+  document.getElementById('c-stock-pct').textContent = has ? pct(stock, total) : '—%';
   document.getElementById('c-bank').textContent      = has ? fmt(bank)  : '—';
+  document.getElementById('c-bank-pct').textContent  = has ? pct(bank, total) : '—%';
   document.getElementById('c-usd').textContent       = has ? 'USD ' + usdAmt.toLocaleString() : '—';
   document.getElementById('c-usd-ntd').textContent   = has ? '≈ NTD ' + fmt(usdNtd) : '—';
   document.getElementById('c-crypto').textContent    = has ? fmt(cryptoNtd) : '—';
+  document.getElementById('c-crypto-pct').textContent= has ? pct(cryptoNtd, total) : '—%';
   document.getElementById('c-other').textContent     = has ? fmt(other) : '—';
+  document.getElementById('c-other-pct').textContent = has ? pct(other, total) : '—%';
 
   const vals = [stock, bank, usdNtd, cryptoNtd, other];
   const keys = ['stock','bank','usd','crypto','other'];
-  keys.forEach((k, i) => {
-    const pEl = document.getElementById('c-'+k+'-pct');
-    if (pEl) pEl.textContent = has ? pct(vals[i], total) : '—%';
-    document.getElementById('l-'+k).textContent = has ? pct(vals[i], total) : '—';
-  });
+  keys.forEach((k,i) => { document.getElementById('l-'+k).textContent = has ? pct(vals[i], total) : '—'; });
 
   chart.data.datasets[0].data = has ? vals : [1,1,1,1,1];
   chart.data.datasets[0].backgroundColor = has ? COLORS : Array(5).fill('#e8e6dc');
   chart.update();
+
+  // 銀行小計
+  document.getElementById('sub-cathay').textContent = fmt(cathay);
+  document.getElementById('sub-mega').textContent   = fmt(mega);
+  document.getElementById('sub-obank').textContent  = fmt(obank);
+
+  if (d.savedAt) document.getElementById('last-saved').textContent = '上次儲存：' + d.savedAt;
 }
 
-function exportData() {
-  const raw = localStorage.getItem('assetData3');
-  if (!raw) { alert('還沒有儲存任何資料'); return; }
-  const text = '【資產儀表板備份】\n' + raw;
-  if (navigator.share) {
-    navigator.share({ title: '資產儀表板備份', text });
-  } else {
-    navigator.clipboard.writeText(text).then(() => alert('✓ 已複製到剪貼簿，請貼到 LINE 或備忘錄傳給自己'));
-  }
-}
-
-function importData() {
-  const text = prompt('請貼上備份文字：');
-  if (!text) return;
-  try {
-    const json = text.replace('【資產儀表板備份】', '').trim();
-    const d = JSON.parse(json);
-    if (!('stock' in d)) throw new Error();
-    localStorage.setItem('assetData3', json);
-    loadData();
-    alert('✓ 匯入成功！');
-  } catch(e) {
-    alert('格式錯誤，請確認貼上的是正確的備份文字');
-  }
-}
+/* ── 儲存：只更新有填的欄位，其他保留舊值 ── */
 function saveData() {
+  const old = getData();
   const now = new Date().toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
 
-  // 讀取舊資料，避免覆蓋其他欄位
-  let old = {};
-  try { old = JSON.parse(localStorage.getItem('assetData3')) || {}; } catch(e) {}
+  const fields = [
+    ['stock',  'input-stock'],
+    ['cathay', 'input-bank-cathay'],
+    ['mega',   'input-bank-mega'],
+    ['obank',  'input-bank-obank'],
+    ['usd',    'input-usd'],
+    ['crypto', 'input-crypto'],
+    ['other',  'input-other'],
+  ];
 
-  const newStock  = document.getElementById('input-stock').value;
-  const newCathay = document.getElementById('input-bank-cathay').value;
-  const newMega   = document.getElementById('input-bank-mega').value;
-  const newObank  = document.getElementById('input-bank-obank').value;
-  const newUsd    = document.getElementById('input-usd').value;
-  const newCrypto = document.getElementById('input-crypto').value;
-  const newOther  = document.getElementById('input-other').value;
+  const merged = { ...old, savedAt: now };
+  merged.cryptoCur = document.getElementById('crypto-currency').value;
 
-  const merged = {
-    stock:     newStock  !== '' ? parseFloat(newStock)  : (old.stock  || 0),
-    cathay:    newCathay !== '' ? parseFloat(newCathay) : (old.cathay || 0),
-    mega:      newMega   !== '' ? parseFloat(newMega)   : (old.mega   || 0),
-    obank:     newObank  !== '' ? parseFloat(newObank)  : (old.obank  || 0),
-    usd:       newUsd    !== '' ? parseFloat(newUsd)    : (old.usd    || 0),
-    crypto:    newCrypto !== '' ? parseFloat(newCrypto) : (old.crypto || 0),
-    cryptoCur: document.getElementById('crypto-currency').value,
-    other:     newOther  !== '' ? parseFloat(newOther)  : (old.other  || 0),
-    savedAt:   now
-  };
-
-  localStorage.setItem('assetData3', JSON.stringify(merged));
-
-  // 清空輸入欄
-  ['input-stock','input-bank-cathay','input-bank-mega','input-bank-obank','input-usd','input-crypto','input-other'].forEach(id => {
-    document.getElementById(id).value = '';
+  fields.forEach(([key, id]) => {
+    const val = document.getElementById(id).value.trim();
+    if (val !== '') merged[key] = parseFloat(val) || 0;
+    // 空白 = 不更新，保留 old 的值
   });
 
-  loadData();
+  localStorage.setItem('assetData4', JSON.stringify(merged));
+
+  // 清空輸入欄
+  fields.forEach(([, id]) => { document.getElementById(id).value = ''; });
+
+  renderCards();
+
   document.getElementById('last-saved').textContent = '上次儲存：' + now;
   const note = document.getElementById('saved-note');
   note.classList.add('show');
   setTimeout(() => note.classList.remove('show'), 2500);
 }
 
-function loadData() {
-  try {
-    const raw = localStorage.getItem('assetData3');
-    if (!raw) return;
-    const d = JSON.parse(raw);
-    if (!d || typeof d !== 'object') return;
-
-    const rate      = usdToNtd || 32;
-    const cathay    = d.cathay || 0;
-    const mega      = d.mega   || 0;
-    const obank     = d.obank  || 0;
-    const bank      = cathay + mega + obank;
-    const stock     = d.stock  || 0;
-    const usdAmt    = d.usd    || 0;
-    const usdNtd    = usdAmt * rate;
-    const cryptoRaw = d.crypto || 0;
-    const cryptoCur = d.cryptoCur || 'NTD';
-    const cryptoNtd = cryptoCur === 'USD' ? cryptoRaw * rate : cryptoRaw;
-    const other     = d.other  || 0;
-    const total     = stock + bank + usdNtd + cryptoNtd + other;
-    const has       = total > 0;
-
-    document.getElementById('c-total').textContent     = has ? fmt(total) : '—';
-    document.getElementById('c-total-usd').textContent = has ? '≈ USD ' + Math.round(total/rate).toLocaleString() : '—';
-    document.getElementById('c-stock').textContent     = has ? fmt(stock) : '—';
-    document.getElementById('c-bank').textContent      = has ? fmt(bank)  : '—';
-    document.getElementById('c-usd').textContent       = has ? 'USD ' + usdAmt.toLocaleString() : '—';
-    document.getElementById('c-usd-ntd').textContent   = has ? '≈ NTD ' + fmt(usdNtd) : '—';
-    document.getElementById('c-crypto').textContent    = has ? fmt(cryptoNtd) : '—';
-    document.getElementById('c-other').textContent     = has ? fmt(other) : '—';
-
-    const vals = [stock, bank, usdNtd, cryptoNtd, other];
-    const keys = ['stock','bank','usd','crypto','other'];
-    keys.forEach((k, i) => {
-      const pEl = document.getElementById('c-'+k+'-pct');
-      if (pEl) pEl.textContent = has ? pct(vals[i], total) : '—%';
-      document.getElementById('l-'+k).textContent = has ? pct(vals[i], total) : '—';
-    });
-
-    chart.data.datasets[0].data = has ? vals : [1,1,1,1,1];
-    chart.data.datasets[0].backgroundColor = has ? COLORS : Array(5).fill('#e8e6dc');
-    chart.update();
-
-    document.getElementById('sub-cathay').textContent = cathay ? fmt(cathay) : '0';
-    document.getElementById('sub-mega').textContent   = mega   ? fmt(mega)   : '0';
-    document.getElementById('sub-obank').textContent  = obank  ? fmt(obank)  : '0';
-
-    if (d.savedAt) document.getElementById('last-saved').textContent = '上次儲存：' + d.savedAt;
-  } catch(e) {
-    console.error('loadData error:', e);
+/* ── 匯出 / 匯入 ── */
+function exportData() {
+  const raw = localStorage.getItem('assetData4');
+  if (!raw) { alert('還沒有儲存任何資料'); return; }
+  const text = '【資產儀表板備份】' + raw;
+  if (navigator.share) {
+    navigator.share({ title: '資產儀表板備份', text });
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('✓ 已複製到剪貼簿'));
   }
 }
+function importData() {
+  const text = prompt('請貼上備份文字：');
+  if (!text) return;
+  try {
+    const json = text.replace('【資產儀表板備份】', '').trim();
+    const d = JSON.parse(json);
+    if (typeof d.stock === 'undefined') throw new Error();
+    localStorage.setItem('assetData4', json);
+    renderCards();
+    alert('✓ 匯入成功！');
+  } catch(e) { alert('格式錯誤，請確認貼上的是正確的備份文字'); }
+}
 
-/* ── INIT ── */
+/* ── 啟動 ── */
 initChart();
 initPin();
 </script>
