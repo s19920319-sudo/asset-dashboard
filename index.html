@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f7f6f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="資產儀表板">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>全資產動態儀表板</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f7f6f0;
+    color: #2c2c2a;
+    min-height: 100vh;
+  }
+  .header {
+    background: #fff;
+    border-bottom: 1px solid #e8e6dc;
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .header h1 { font-size: 18px; font-weight: 500; color: #2c2c2a; letter-spacing: -0.3px; }
+  .header span { font-size: 12px; color: #888780; }
+  .main { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  .cards-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  @media (max-width: 540px) {
+    .cards-row { grid-template-columns: repeat(3, 1fr); }
+    .card.total { grid-column: span 3; }
+  }
+  .card {
+    background: #fff;
+    border: 1px solid #e8e6dc;
+    border-radius: 14px;
+    padding: 12px 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 14px 14px 0 0;
+  }
+  .card.total::before  { background: #b5a8f0; }
+  .card.stock::before  { background: #7ac47a; }
+  .card.bank::before   { background: #f5c96b; }
+  .card.crypto::before { background: #f0a070; }
+  .card.other::before  { background: #8bc4e0; }
+  .card-label { font-size: 10px; color: #888780; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-value { font-size: 16px; font-weight: 500; color: #2c2c2a; letter-spacing: -0.4px; line-height: 1.1; }
+  .card-sub   { font-size: 10px; color: #b4b2a9; margin-top: 3px; }
+
+  .content-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 540px) {
+    .content-row { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid #e8e6dc;
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: #444441;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0ede4;
+  }
+
+  .legend { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #5f5e5a; }
+  .legend-left { display: flex; align-items: center; gap: 7px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend-pct { font-weight: 500; color: #2c2c2a; font-size: 12px; }
+
+  .form-grid { display: flex; flex-direction: column; gap: 10px; }
+  .field-group { display: flex; flex-direction: column; gap: 4px; }
+  .field-label { font-size: 11px; color: #888780; }
+  .field-input-wrap { position: relative; }
+  .field-prefix {
+    position: absolute; left: 10px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px; color: #b4b2a9; pointer-events: none;
+  }
+  input[type="number"] {
+    width: 100%;
+    padding: 9px 10px 9px 30px;
+    border: 1px solid #e8e6dc;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #2c2c2a;
+    background: #fafaf7;
+    outline: none;
+    transition: border-color 0.15s;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type="number"]:focus { border-color: #7ac47a; background: #fff; }
+
+  .divider { border: none; border-top: 1px dashed #ede9de; margin: 2px 0; }
+  .section-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.4px; color: #b4b2a9; text-transform: uppercase; margin-bottom: -4px; }
+
+  .btn-save {
+    margin-top: 2px;
+    width: 100%;
+    padding: 11px;
+    background: #2c2c2a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-save:hover { background: #444441; }
+  .btn-save:active { transform: scale(0.98); }
+
+  .saved-note {
+    font-size: 11px; color: #639922; text-align: center;
+    margin-top: 4px; height: 14px; opacity: 0; transition: opacity 0.3s;
+  }
+  .saved-note.show { opacity: 1; }
+
+  .last-saved {
+    font-size: 10px; color: #b4b2a9; text-align: right; margin-top: -8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>全資產動態儀表板</h1>
+  <span>NT$</span>
+</div>
+
+<div class="main">
+  <div class="cards-row">
+    <div class="card total">
+      <div class="card-label">總資產</div>
+      <div class="card-value" id="c-total">—</div>
+      <div class="card-sub">NT$</div>
+    </div>
+    <div class="card stock">
+      <div class="card-label">台股總市值</div>
+      <div class="card-value" id="c-stock">—</div>
+      <div class="card-sub" id="c-stock-pct">—%</div>
+    </div>
+    <div class="card bank">
+      <div class="card-label">銀行存款</div>
+      <div class="card-value" id="c-bank">—</div>
+      <div class="card-sub" id="c-bank-pct">—%</div>
+    </div>
+    <div class="card crypto">
+      <div class="card-label">幣圈資產</div>
+      <div class="card-value" id="c-crypto">—</div>
+      <div class="card-sub" id="c-crypto-pct">—%</div>
+    </div>
+    <div class="card other">
+      <div class="card-label">其他資產</div>
+      <div class="card-value" id="c-other">—</div>
+      <div class="card-sub" id="c-other-pct">—%</div>
+    </div>
+  </div>
+
+  <div class="content-row">
+    <div class="panel">
+      <div class="panel-title">資產配置比例</div>
+      <div style="position: relative; width: 100%; height: 180px;">
+        <canvas id="assetChart" role="img" aria-label="甜甜圈圖：四類資產比例">資產比例圖表</canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-left"><div class="legend-dot" style="background:#7ac47a"></div>台股總市值</div>
+          <span class="legend-pct" id="l-stock">—</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-left"><div class="legend-dot" style="background:#f5c96b"></div>銀行存款</div>
+          <span class="legend-pct" id="l-bank">—</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-left"><div class="legend-dot" style="background:#f0a070"></div>幣圈資產</div>
+          <span class="legend-pct" id="l-crypto">—</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-left"><div class="legend-dot" style="background:#8bc4e0"></div>其他資產</div>
+          <span class="legend-pct" id="l-other">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">手動輸入資產</div>
+      <div class="form-grid">
+        <div class="section-tag">股市</div>
+        <div class="field-group">
+          <label class="field-label" for="input-stock">台股總市值 (NT$)</label>
+          <div class="field-input-wrap">
+            <span class="field-prefix">$</span>
+            <input type="number" id="input-stock" placeholder="0" min="0" inputmode="numeric" />
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="section-tag">存款</div>
+        <div class="field-group">
+          <label class="field-label" for="input-bank">銀行存款 (NT$)</label>
+          <div class="field-input-wrap">
+            <span class="field-prefix">$</span>
+            <input type="number" id="input-bank" placeholder="0" min="0" inputmode="numeric" />
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="section-tag">其他</div>
+        <div class="field-group">
+          <label class="field-label" for="input-crypto">幣圈資產 (NT$)</label>
+          <div class="field-input-wrap">
+            <span class="field-prefix">$</span>
+            <input type="number" id="input-crypto" placeholder="0" min="0" inputmode="numeric" />
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="input-other">其他資產 (NT$)</label>
+          <div class="field-input-wrap">
+            <span class="field-prefix">$</span>
+            <input type="number" id="input-other" placeholder="0" min="0" inputmode="numeric" />
+          </div>
+        </div>
+        <button class="btn-save" onclick="saveData()">儲存並更新</button>
+        <div class="saved-note" id="saved-note">✓ 資料已儲存</div>
+        <div class="last-saved" id="last-saved"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+
+const COLORS = ['#7ac47a','#f5c96b','#f0a070','#8bc4e0'];
+let chart;
+
+function fmt(n) {
+  if (n >= 1e8) return (n/1e8).toFixed(1) + ' 億';
+  if (n >= 1e4) return (n/1e4).toFixed(1) + ' 萬';
+  return n.toLocaleString('zh-TW');
+}
+function pct(v, t) { return t ? (v/t*100).toFixed(1)+'%' : '0.0%'; }
+
+function initChart() {
+  chart = new Chart(document.getElementById('assetChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: ['台股總市值','銀行存款','幣圈資產','其他資產'],
+      datasets: [{ data:[1,1,1,1], backgroundColor:['#e8e6dc','#e8e6dc','#e8e6dc','#e8e6dc'], borderWidth:0, hoverOffset:6 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => {
+          const v = ctx.raw, t = ctx.dataset.data.reduce((a,b)=>a+b,0);
+          return ' NT$ ' + v.toLocaleString('zh-TW') + '  (' + (v/t*100).toFixed(1) + '%)';
+        }}}
+      }
+    }
+  });
+}
+
+function updateUI(s, b, c, o) {
+  const t = s+b+c+o, has = t > 0;
+  document.getElementById('c-total').textContent   = has ? fmt(t) : '—';
+  document.getElementById('c-stock').textContent   = has ? fmt(s) : '—';
+  document.getElementById('c-bank').textContent    = has ? fmt(b) : '—';
+  document.getElementById('c-crypto').textContent  = has ? fmt(c) : '—';
+  document.getElementById('c-other').textContent   = has ? fmt(o) : '—';
+  ['stock','bank','crypto','other'].forEach((k,i) => {
+    const v = [s,b,c,o][i];
+    document.getElementById('c-'+k+'-pct').textContent = has ? pct(v,t) : '—%';
+    document.getElementById('l-'+k).textContent = has ? pct(v,t) : '—';
+  });
+  chart.data.datasets[0].data = has ? [s,b,c,o] : [1,1,1,1];
+  chart.data.datasets[0].backgroundColor = has ? COLORS : ['#e8e6dc','#e8e6dc','#e8e6dc','#e8e6dc'];
+  chart.update();
+}
+
+function saveData() {
+  const s = parseFloat(document.getElementById('input-stock').value)  || 0;
+  const b = parseFloat(document.getElementById('input-bank').value)   || 0;
+  const c = parseFloat(document.getElementById('input-crypto').value) || 0;
+  const o = parseFloat(document.getElementById('input-other').value)  || 0;
+  const now = new Date().toLocaleString('zh-TW', { month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  localStorage.setItem('assetData', JSON.stringify({ s, b, c, o, savedAt: now }));
+  updateUI(s, b, c, o);
+  document.getElementById('last-saved').textContent = '上次儲存：' + now;
+  const note = document.getElementById('saved-note');
+  note.classList.add('show');
+  setTimeout(() => note.classList.remove('show'), 2500);
+}
+
+function loadData() {
+  try {
+    const d = JSON.parse(localStorage.getItem('assetData'));
+    if (!d) return;
+    document.getElementById('input-stock').value  = d.s || '';
+    document.getElementById('input-bank').value   = d.b || '';
+    document.getElementById('input-crypto').value = d.c || '';
+    document.getElementById('input-other').value  = d.o || '';
+    if (d.savedAt) document.getElementById('last-saved').textContent = '上次儲存：' + d.savedAt;
+    updateUI(d.s||0, d.b||0, d.c||0, d.o||0);
+  } catch(e) {}
+}
+
+initChart();
+loadData();
+</script>
+</body>
+</html>
