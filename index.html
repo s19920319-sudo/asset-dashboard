@@ -334,19 +334,41 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 let usdToNtd = null;
 
 async function fetchRate() {
-  try {
-    const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=TWD');
-    const d = await r.json();
-    usdToNtd = d.rates.TWD;
-    const badge = document.getElementById('rate-badge');
-    badge.textContent = '1 USD ≈ ' + usdToNtd.toFixed(2) + ' NTD';
-    badge.className = 'rate-badge';
-    updateUIFromInputs();
-  } catch(e) {
-    const badge = document.getElementById('rate-badge');
-    badge.textContent = '匯率載入失敗';
-    badge.className = 'rate-badge loading';
+  const badge = document.getElementById('rate-badge');
+  const apis = [
+    async () => {
+      const r = await fetch('https://open.er-api.com/v6/latest/USD');
+      const d = await r.json();
+      return d.rates.TWD;
+    },
+    async () => {
+      const r = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+      const d = await r.json();
+      return d.rates.TWD;
+    },
+    async () => {
+      const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=TWD');
+      const d = await r.json();
+      return d.rates.TWD;
+    }
+  ];
+  for (const api of apis) {
+    try {
+      const rate = await api();
+      if (rate && rate > 20) {
+        usdToNtd = rate;
+        badge.textContent = '1 USD ≈ ' + usdToNtd.toFixed(2) + ' NTD';
+        badge.className = 'rate-badge';
+        updateUIFromInputs();
+        return;
+      }
+    } catch(e) { continue; }
   }
+  // 全部失敗時使用備用匯率
+  usdToNtd = 32;
+  badge.textContent = '匯率參考值 32 NTD';
+  badge.className = 'rate-badge loading';
+  updateUIFromInputs();
 }
 
 /* ── PIN LOGIC ── */
