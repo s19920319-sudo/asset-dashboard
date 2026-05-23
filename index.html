@@ -492,28 +492,49 @@ function saveData() {
   setTimeout(() => note.classList.remove('show'), 2500);
 }
 
-/* ── 匯出 / 匯入 ── */
+/* ── 匯出 / 匯入（密碼保護） ── */
+function xorEncrypt(str, key) {
+  let out = '';
+  for (let i = 0; i < str.length; i++) {
+    out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  }
+  return btoa(unescape(encodeURIComponent(out)));
+}
+function xorDecrypt(encoded, key) {
+  try {
+    const str = decodeURIComponent(escape(atob(encoded)));
+    let out = '';
+    for (let i = 0; i < str.length; i++) {
+      out += String.fromCharCode(str.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return out;
+  } catch(e) { return null; }
+}
+
 function exportData() {
   const raw = localStorage.getItem('assetData4');
   if (!raw) { alert('還沒有儲存任何資料'); return; }
-  const text = '【資產儀表板備份】' + raw;
-  if (navigator.share) {
-    navigator.share({ title: '資產儀表板備份', text });
-  } else {
-    navigator.clipboard.writeText(text).then(() => alert('✓ 已複製到剪貼簿'));
-  }
+  const pw = prompt('請設定匯出密碼（5-6位數字）：');
+  if (!pw) return;
+  if (!/^\d{5,6}$/.test(pw)) { alert('請輸入 5 到 6 位數字'); return; }
+  const encrypted = xorEncrypt(raw, pw);
+  prompt('請複製以下備份碼，傳給自己保存：', encrypted);
 }
+
 function importData() {
-  const text = prompt('請貼上備份文字：');
-  if (!text) return;
+  const code = prompt('請貼上備份碼：');
+  if (!code) return;
+  const pw = prompt('請輸入匯出時設定的密碼：');
+  if (!pw) return;
+  const json = xorDecrypt(code.trim(), pw);
+  if (!json) { alert('解密失敗，請確認備份碼與密碼是否正確'); return; }
   try {
-    const json = text.replace('【資產儀表板備份】', '').trim();
     const d = JSON.parse(json);
     if (typeof d.stock === 'undefined') throw new Error();
     localStorage.setItem('assetData4', json);
     renderCards();
     alert('✓ 匯入成功！');
-  } catch(e) { alert('格式錯誤，請確認貼上的是正確的備份文字'); }
+  } catch(e) { alert('格式錯誤，密碼可能不正確'); }
 }
 
 /* ── 啟動 ── */
