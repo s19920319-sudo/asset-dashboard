@@ -443,7 +443,12 @@ function pct(v, t) { return t ? (v/t*100).toFixed(1)+'%' : '0.0%'; }
 
 /* ── 讀取儲存的資料 ── */
 function getData() {
-  try { return JSON.parse(localStorage.getItem('assetData4')) || {}; } catch(e) { return {}; }
+  try {
+    // 依序嘗試新舊兩個 key
+    return JSON.parse(localStorage.getItem('assetData4'))
+        || JSON.parse(localStorage.getItem('assetData3'))
+        || {};
+  } catch(e) { return {}; }
 }
 
 /* ── 顯示卡片與圖表 ── */
