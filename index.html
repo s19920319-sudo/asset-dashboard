@@ -596,7 +596,7 @@ function exportData() {
   // 用密碼做簡單校驗碼
   const joined = vals.join(',');
   const checksum = (joined.split('').reduce((s, c) => s + c.charCodeAt(0), 0) + parseInt(pw)) % 100;
-  const code = btoa(joined + '|' + checksum).replace(/=/g, '');
+  const code = btoa(joined + '|' + checksum).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 
   document.getElementById('export-code').value = code;
   document.getElementById('export-result').style.display = 'flex';
@@ -611,7 +611,7 @@ function doImport() {
 
   try {
     // 補回 base64 padding
-    const padded = code + '=='.slice(0, (4 - code.length % 4) % 4);
+    const padded = code.replace(/-/g, '+').replace(/_/g, '/') + '=='.slice(0, (4 - code.length % 4) % 4);
     const raw = atob(padded);
     const [joined, checksumStr] = raw.split('|');
     const checksum = (joined.split('').reduce((s, c) => s + c.charCodeAt(0), 0) + parseInt(pw)) % 100;
